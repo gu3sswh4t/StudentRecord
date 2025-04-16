@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STUDENT RECORD</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        .confirmation-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 128, 0, 0.9); 
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            z-index: 101;
+            text-align: center;
+            display: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .checkmark-icon {
+            font-size: 40px;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        
+        .error-message {
+            position: fixed;
+            top: 10%; 
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #f44336; 
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            z-index: 101;
+            text-align: center;
+            display: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        
+        .logout-button {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 100; 
+        }
+
+        .logout-button:hover {
+            background-color: #0056b3;
+        }
+
+        
+        .modal {
+            display: none;
+            position: fixed; 
+            z-index: 1; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%;
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.4); 
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; 
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; 
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .close-button {
+            color: #aaa;
+            position: absolute;
+            right: 10px;
+            top: 5px;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        #student-form {
+            padding: 20px;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: flex-start; 
+            gap: 15px; 
+            margin-bottom: 15px;
+            max-width: 960px; 
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 30px; 
+            padding-right: 30px; 
+            box-sizing: border-box; 
+        }
+
+        .button-container button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        #addRecordButton {
+            background-color: #007bff;
+            color: white;
+        }
+
+        #addRecordButton:hover {
+            background-color: #0056b3;
+        }
+
+        #installButton {
+            background-color: #28a745;
+            color: white;
+        }
+
+        #installButton:hover {
+            background-color: #1e7e34;
+        }
+    </style>
+</head>
+<body>
+    <button id="logoutButton" class="logout-button">Logout</button>
+    <div class="container">
+        <div class="header">
+            <h1>Student Data Management</h1>
+            <div>
+            </div>
+        </div>
+
+        <div id="addRecordModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button">&times;</span>
+                <div id="student-form">
+                    <h2>Add New Student / Edit Student</h2>
+                    <form id="add-student-form">
+                        <input type="hidden" id="student-id">
+                        <label for="lrn">LRN:</label>
+                        <input type="text" id="lrn" maxlength="12" required><br><br>
+                        <label for="firstName">First Name:</label>
+                        <input type="text" id="firstName" required><br><br>
+                        <label for="lastName">Last Name:</label>
+                        <input type="text" id="lastName" required><br><br>
+                        <label for="middleName">Middle Name:</label>
+                        <input type="text" id="middleName"><br><br>
+                        <label for="sex">Sex:</label>
+                        <select id="sex" required>
+                            <option value="">-- Select Sex --</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select><br><br>
+                        <label for="contact">Contact Number:</label>
+                        <input type="tel" id="contact" maxlength="11"><br><br>
+                        <label for="address">Address:</label>
+                        <textarea id="address" required></textarea><br><br>
+                        <label for="dob">Date of Birth:</label>
+                        <input type="date" id="dob" required><br><br>
+                        <label for="parents">Parents (Full Name) put N/A if not applicable:</label>
+                        <input type="text" id="parents" required><br><br>
+                        <label for="guardian">Guardian (if different from parents):</label>
+                        <input type="text" id="guardian"><br><br>
+                        <label for="religion">Religion:</label>
+                        <input type="text" id="religion"><br><br>
+                        <label for="fourPs">Member of 4P's:</label>
+                        <input type="checkbox" id="fourPs"><br><br>
+                        <label for="club">Club Membership:</label>
+                        <input type="text" id="club"><br><br>
+                        <label for="learningModality">Learning Modality:</label>
+                        <select id="learningModality" required>
+                            <option value="">-- Select Modality --</option>
+                            <option value="Face to Face">Face to Face</option>
+                            <option value="Modular Print">Modular Print</option>
+                            <option value="Online">Online</option>
+                            <option value="ADM">ADM</option>
+                        </select><br><br>
+                        <label for="juniorHighGraduationDate">Date of Graduation in Junior High School:</label>
+                        <input type="date" id="juniorHighGraduationDate"><br><br>
+                        <label for="seniorHighGraduationDate">Date of Graduation in Senior High School:</label>
+                        <input type="date" id="seniorHighGraduationDate"><br><br>
+                        <label for="juniorHighHonors">Honors Received in Junior High School:</label>
+                        <input type="text" id="juniorHighHonors"><br><br>
+                        <label for="seniorHighHonors">Honors Received in Senior High School:</label>
+                        <input type="text" id="seniorHighHonors"><br><br>
+                        <label for="remarks">Remarks:</label>
+                        <select id="remarks">
+                            <option value="">-- Select Remark --</option>
+                            <option value="Transferred In">Transferred In</option>
+                            <option value="Transferred Out">Transferred Out</option>
+                            <option value="CCT Recipient">CCT Recipient</option>
+                            <option value="Balik Aral">Balik Aral</option>
+                            <option value="Especial Needs Education">Especial Needs Education</option>
+                            <option value="Accelerated">Accelerated</option>
+                        </select><br><br>
+                        <button type="button" onclick="addEnrollment()">Add Enrollment</button>
+                        <div id="enrollment-fields">
+                        </div>
+                        <br>
+                        <button type="button" onclick="addMisconduct()">Add Misconduct Instance</button>
+                        <div id="misconduct-fields">
+                        </div>
+                        <br>
+                        <label for="schoolRecordReleased">School Record Released:</label>
+                        <input type="checkbox" id="schoolRecordReleased" onchange="toggleReleaseDate()">
+                        <label for="releaseDate" id="releaseDateLabel" style="display: none;">Release Date:</label>
+                        <input type="date" id="releaseDate" style="display: none;"><br><br>
+                        <button type="submit">Save Student</button>
+                        <button type="button" onclick="clearForm()" style="background-color: #f44336; margin-left: 10px;">Cancel</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="button-container">
+            <button id="addRecordButton" style="padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">Add Record</button>
+            <button id="installButton" class="install-button">Install App</button>
+        </div>
+
+        <div class="content">
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="Search by LRN, First Name, or Last Name" class="transparent-input">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+            <div id="student-list-container">
+                <h2>Student Records</h2>
+                <ul id="students">
+                </ul>
+            </div>
+        </div>
+
+        <div id="view-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" id="closeViewModal">&times;</span>
+                <h3 id="view-student-name"></h3>
+                <div id="view-student-details"></div>
+            </div>
+        </div>
+
+        <div id="history-modal" class="modal">
+            <div class="modal-content">
+                <span id="closeHistoryModal" class="close-button">&times;</span>
+                <h2>Modification History</h2>
+                <div id="history-details">
+                    </div>
+            </div>
+        </div>
+
+        <div id="confirmation-message" class="confirmation-message">
+            <i class="fas fa-check-circle checkmark-icon"></i>
+            <p>Student data saved successfully!</p>
+        </div>
+
+        <div id="error-message" class="error-message"></div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyByP-tkxIQdK7dFZa9uwKqH1I4hQDYh_1U",
+            authDomain: "cnhsstudentdatabase.firebaseapp.com",
+            databaseURL: "https://cnhsstudentdatabase-default-rtdb.firebaseio.com",
+            projectId: "cnhsstudentdatabase",
+            storageBucket: "cnhsstudentdatabase.firebasestorage.app",
+            messagingSenderId: "999201205232",
+            appId: "1:999201205232:web:521f2720c930a2db304b35"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const logoutButton = document.getElementById('logoutButton');
+
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                
+                window.location.href = 'login.html';
+            }
+            
+            console.log("User is signed in:", user);
+            
+        });
+
+        logoutButton.addEventListener('click', () => {
+            auth.signOut().then(() => {
+                
+                window.location.href = 'login.html';
+            }).catch((error) => {
+                
+                console.error("Error signing out:", error);
+            });
+        });
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

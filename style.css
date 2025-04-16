@@ -1,0 +1,418 @@
+body {
+    font-family: sans-serif;
+    margin: 0;
+    background-color: #fbe9e7;
+    color: #1a237e;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+    max-width: 960px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header h1 {
+    color: #1a237e;
+    margin-bottom: 10px;
+}
+
+.header div {
+    margin-bottom: 10px;
+}
+
+.header button {
+    background-color: #ff7043;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.header button:hover {
+    background-color: #e64a19;
+}
+
+.container {
+    max-width: 960px;
+    margin: 20px auto;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.search-container {
+    display: flex;
+    margin-bottom: 15px;
+    align-items: center;
+}
+
+.transparent-input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-right: 10px;
+    box-sizing: border-box;
+}
+
+.search-icon {
+    color: #ff9800;
+    cursor: pointer;
+}
+
+#student-list-container {
+    margin-top: 10px;
+}
+
+#students {
+    list-style-type: none;
+    padding: 0;
+}
+
+#students li {
+    background-color: #ffe0b2;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    color: #1a237e;
+    border-bottom: 1px solid #fbe9e7;
+}
+
+#students li:nth-child(even) {
+    background-color: #ffcc80;
+}
+
+.fullscreen-form {
+    display: none; 
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); 
+    z-index: 100;
+    overflow-y: auto; 
+}
+
+.fullscreen-form .form-content {
+    background-color: #fff;
+    margin: 30px auto;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    width: 90%; 
+    max-width: 600px; 
+    position: relative;
+    color: #1a237e;
+}
+
+.fullscreen-form .form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.fullscreen-form .form-header h2 {
+    margin: 0;
+}
+
+.fullscreen-form .close-form-btn {
+    background: none;
+    color: #aaa;
+    border: none;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    outline: none;
+}
+
+.fullscreen-form .close-form-btn:hover,
+.fullscreen-form .close-form-btn:focus {
+    color: black;
+    text-decoration: none;
+}
+
+.fullscreen-form .form-group {
+    margin-bottom: 15px;
+}
+
+.fullscreen-form .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #1a237e;
+}
+
+.fullscreen-form .form-group input[type="text"],
+.fullscreen-form .form-group input[type="date"],
+.fullscreen-form .form-group input[type="tel"],
+.fullscreen-form .form-group select,
+.fullscreen-form .form-group textarea {
+    width: calc(100% - 12px);
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.fullscreen-form .form-group textarea {
+    resize: vertical;
+}
+
+.fullscreen-form .form-actions {
+    margin-top: 20px;
+    text-align: right;
+}
+
+.fullscreen-form .form-actions button {
+    background-color: #ff7043;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.fullscreen-form .form-actions button:first-child {
+    margin-left: 0;
+}
+
+.fullscreen-form .form-actions button:hover {
+    background-color: #e64a19;
+}
+
+
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 1000; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgba(0,0,0,0.6); 
+}
+
+.modal-content {
+    background-color: #fff; 
+    margin: 5% auto; 
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%; 
+    max-width: 700px; 
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2); 
+    position: relative;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+.modal-content h2 {
+    color: #333; 
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
+    border-bottom: 2px solid #eee; 
+    padding-bottom: 15px;
+}
+
+.close-button {
+    color: #888; 
+    position: absolute;
+    right: 15px;
+    top: 10px; 
+    font-size: 24px; 
+    font-weight: normal;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    outline: none;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #555;
+    text-decoration: none;
+    opacity: 1; 
+}
+
+
+#student-form {
+    padding: 0; 
+}
+
+#add-student-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+
+#add-student-form input[type="text"],
+#add-student-form input[type="date"],
+#add-student-form input[type="tel"],
+#add-student-form select,
+#add-student-form textarea {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px; 
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+#add-student-form input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+#add-student-form button[type="submit"],
+#add-student-form button[type="button"] {
+    background-color: #007bff; 
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 15px;
+    transition: background-color 0.3s ease;
+}
+
+#add-student-form button[type="button"] {
+    background-color: #dc3545; 
+    margin-left: 10px;
+}
+
+#add-student-form button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+#add-student-form button[type="button"]:hover {
+    background-color: #c82333;
+}
+
+
+#enrollment-fields > div,
+#misconduct-fields > div {
+    background-color: #f9f9f9;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #eee;
+    border-radius: 6px;
+}
+
+#enrollment-fields h3,
+#misconduct-fields h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #777;
+    font-size: 1.1em;
+}
+
+#enrollment-fields label,
+#misconduct-fields label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: normal;
+    color: #777;
+}
+
+#enrollment-fields input[type="text"],
+#enrollment-fields input[type="date"],
+#misconduct-fields textarea,
+#misconduct-fields input[type="date"],
+#misconduct-fields input[type="text"] {
+    width: calc(100% - 20px);
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+#enrollment-fields .remove-btn,
+#misconduct-fields .remove-btn {
+    background-color: #6c757d;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 5px;
+    transition: background-color 0.3s ease;
+}
+
+#enrollment-fields .remove-btn:hover,
+#misconduct-fields .remove-btn:hover {
+    background-color: #5a6268;
+}
+
+
+.button-container {
+    display: flex;
+    justify-content: flex-start; 
+    gap: 15px; 
+    margin-bottom: 15px;
+    max-width: 960px; 
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 30px; 
+    padding-right: 30px; 
+    box-sizing: border-box;
+}
+
+.button-container button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+#addRecordButton {
+    background-color: #007bff;
+    color: white;
+}
+
+#addRecordButton:hover {
+    background-color: #0056b3;
+}
+
+#installButton {
+    background-color: #28a745;
+    color: white;
+}
+
+#installButton:hover {
+    background-color: #1e7e34;
+}
