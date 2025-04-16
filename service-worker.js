@@ -56,7 +56,6 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// Activate the service worker and clean up old caches
 self.addEventListener('activate', event => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
