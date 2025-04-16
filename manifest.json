@@ -1,0 +1,22 @@
+{
+  "name": "Student Data Management",
+  "short_name": "Student Records",
+  "description": "A Cogon National High School web application for managing student records.",
+  "start_url": "index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#1a237e",
+  "background_color": "#fbe9e7",
+  "icons": [
+    {
+      "src": "logo/Cogon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "logo/Cogon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
