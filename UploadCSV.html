@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload CSV to Database</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .upload-container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 600px;
+        }
+
+        h1 {
+            color: #3498db;
+            margin-bottom: 30px;
+        }
+
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .file-input-button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            border: none;
+        }
+
+        .file-input-button:hover {
+            background-color: #2980b9;
+        }
+
+        .file-input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            font-size: 100px;
+            cursor: pointer;
+        }
+
+        #file-name {
+            margin-top: 10px;
+            color: #555;
+            font-size: 14px;
+        }
+
+        #upload-button {
+            background-color: #2ecc71;
+            color: white;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+        }
+
+        #upload-button:hover {
+            background-color: #27ae60;
+        }
+
+        #progress-container {
+            margin-top: 20px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            overflow: hidden;
+            display: none;
+        }
+
+        #progress-bar {
+            background-color: #2ecc71;
+            height: 20px;
+            width: 0%;
+            border-radius: 5px;
+        }
+
+        #upload-status {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        #error-list {
+            margin-top: 20px;
+            color: red;
+            text-align: left;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 15px;
+            background-color: #777;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+        }
+
+        .back-button:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button">Back to Main</a>
+    <div class="upload-container">
+        <h1>Upload CSV File to Database</h1>
+        <form id="upload-form" class="upload-form">
+            <div class="file-input-wrapper">
+                <button class="file-input-button">Select CSV File</button>
+                <input type="file" id="csv-file" class="file-input" accept=".csv">
+            </div>
+            <p id="file-name"></p>
+            <button type="button" id="upload-button">Upload to Database</button>
+
+            <div id="progress-container">
+                <div id="progress-bar"></div>
+            </div>
+            <p id="upload-status"></p>
+            <ul id="error-list"></ul>
+        </form>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script>
+        // Initialize Firebase (Use your configuration from index.html)
+        const firebaseConfig = {
+            apiKey: "AIzaSyByP-tkxIQdK7dFZa9uwKqH1I4hQDYh_1U",
+            authDomain: "cnhsstudentdatabase.firebaseapp.com",
+            databaseURL: "https://cnhsstudentdatabase-default-rtdb.firebaseio.com",
+            projectId: "cnhsstudentdatabase",
+            storageBucket: "cnhsstudentdatabase.firebasestorage.app",
+            messagingSenderId: "999201205232",
+            appId: "1:999201205232:web:521f2720c930a2db304b35"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const studentsRef = database.ref('students');
+
+        const fileInput = document.getElementById('csv-file');
+        const fileNameDisplay = document.getElementById('file-name');
+        const uploadButton = document.getElementById('upload-button');
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+        const uploadStatus = document.getElementById('upload-status');
+        const errorList = document.getElementById('error-list');
+
+        let existingLRNs = new Set();
+
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                fileNameDisplay.textContent = `Selected file: ${file.name}`;
+            } else {
+                fileNameDisplay.textContent = '';
+            }
+        });
+
+        uploadButton.addEventListener('click', () => {
+            const file = fileInput.files[0];
+            if (!file) {
+                uploadStatus.textContent = 'Please select a CSV file.';
+                uploadStatus.style.color = 'red';
+                return;
+            }
+
+            // Fetch existing LRNs before processing the file
+            studentsRef.once('value', (snapshot) => {
+                existingLRNs.clear();
+                snapshot.forEach(childSnapshot => {
+                    const studentData = childSnapshot.val();
+                    if (studentData && studentData.lrn) {
+                        existingLRNs.add(studentData.lrn);
+                    }
+                });
+                processCSVFile(file);
+            });
+        });
+
+        function processCSVFile(file) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const csvText = e.target.result;
+                const lines = csvText.split('\n').map(line => line.trim());
+                if (lines.length < 2) {
+                    uploadStatus.textContent = 'CSV file is empty or has no data.';
+                    uploadStatus.style.color = 'red';
+                    return;
+                }
+
+                const headers = lines[0].split(',');
+                const newStudents = [];
+                const duplicateLRNs = [];
+                errorList.innerHTML = ''; // Clear previous errors
+
+                for (let i = 1; i < lines.length; i++) {
+                    const currentLine = lines[i].split(',');
+                    if (currentLine.length === headers.length) {
+                        const student = {};
+                        for (let j = 0; j < headers.length; j++) {
+                            student[headers[j].trim()] = currentLine[j].trim();
+                        }
+
+                        if (student.lrn && student.firstName && student.lastName) {
+                            if (existingLRNs.has(student.lrn)) {
+                                duplicateLRNs.push(student.lrn);
+                            } else {
+                                newStudents.push(student);
+                            }
+                        } else {
+                            const listItem = document.createElement('li');
+                            listItem.textContent = `Skipping row ${i + 1}: Missing LRN, First Name, or Last Name.`;
+                            errorList.appendChild(listItem);
+                        }
+                    } else if (currentLine.length > 1) {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `Skipping row ${i + 1}: Inconsistent number of columns.`;
+                        errorList.appendChild(listItem);
+                    }
+                }
+
+                if (duplicateLRNs.length > 0) {
+                    uploadStatus.textContent = 'Please correct the following duplicate LRNs in the file and re-upload.';
+                    uploadStatus.style.color = 'orange';
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `Duplicate LRNs found: ${duplicateLRNs.join(', ')}`;
+                    errorList.appendChild(listItem);
+                    progressContainer.style.display = 'none';
+                } else if (newStudents.length > 0) {
+                    uploadDataToDatabase(newStudents);
+                } else if (errorList.children.length === 0) {
+                    uploadStatus.textContent = 'No new valid student data found in the CSV file.';
+                    uploadStatus.style.color = 'info';
+                    progressContainer.style.display = 'none';
+                } else {
+                    uploadStatus.textContent = 'No new students to upload due to errors or missing data.';
+                    uploadStatus.style.color = 'orange';
+                    progressContainer.style.display = 'none';
+                }
+            };
+
+            reader.onerror = function(error) {
+                console.error('Error reading CSV file:', error);
+                uploadStatus.textContent = `Error reading file: ${error.message}`;
+                uploadStatus.style.color = 'red';
+                progressContainer.style.display = 'none';
+            };
+
+            reader.readAsText(file);
+        }
+
+        function uploadDataToDatabase(studentsToUpload) {
+            uploadStatus.textContent = 'Uploading data to database...';
+            uploadStatus.style.color = '#555';
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+
+            const totalStudents = studentsToUpload.length;
+            let uploadedCount = 0;
+            let errorCount = 0;
+            const uploadPromises = [];
+
+            studentsToUpload.forEach(student => {
+                uploadPromises.push(
+                    studentsRef.push(student)
+                        .then(() => {
+                            uploadedCount++;
+                            const progress = (uploadedCount / totalStudents) * 100;
+                            progressBar.style.width = progress + '%';
+                        })
+                        .catch((error) => {
+                            console.error('Error uploading student:', error);
+                            errorCount++;
+                        })
+                );
+            });
+
+            Promise.all(uploadPromises)
+                .then(() => {
+                    progressContainer.style.display = 'none';
+                    if (errorCount > 0 || errorList.children.length > 0) {
+                        uploadStatus.textContent = `Upload complete. ${uploadedCount} students uploaded successfully, ${errorCount} errors. See error list for details.`;
+                        uploadStatus.style.color = errorCount > 0 ? 'orange' : 'green';
+                    } else {
+                        uploadStatus.textContent = `Upload complete. ${uploadedCount} students uploaded successfully.`;
+                        uploadStatus.style.color = 'green';
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error during batch upload:', error);
+                    uploadStatus.textContent = `Upload failed: ${error.message}`;
+                    uploadStatus.style.color = 'red';
+                    progressContainer.style.display = 'none';
+                });
+        }
+    </script>
+</body>
+</html>

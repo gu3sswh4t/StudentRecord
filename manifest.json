@@ -1,0 +1,20 @@
+{
+  "name": "Student Records Manager",
+  "short_name": "Student Record",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f2f2f2",
+  "theme_color": "#4CAF50",
+  "icons": [
+    {
+      "src": "logo/Cogon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "logo/Cogon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
