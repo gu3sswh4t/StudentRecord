@@ -103,9 +103,12 @@ function renderStudents(data) {
 function saveStudentData(newStudentData, studentId = null) {
     const timestamp = new Date().toISOString();
     const currentUser = firebase.auth().currentUser;
+    console.log("Current User Object in saveStudentData (new record):", currentUser);
     const modifiedBy = currentUser ? currentUser.uid : 'Unknown User';
     const modifiedByUserDisplayName = currentUser ? (currentUser.displayName || currentUser.email || 'User ID: ' + modifiedBy) : 'Unknown User';
     const createdByEmail = currentUser ? currentUser.email : 'Unknown User';
+    console.log("Created By Email (new record):", createdByEmail);
+
     if (studentId) {
         return studentsRef.child(studentId).get().then(snapshot => {
             const oldData = snapshot.val();
@@ -161,8 +164,11 @@ function saveStudentData(newStudentData, studentId = null) {
             timestamp: timestamp,
             createdByEmail: createdByEmail
         };
-        newStudentData.creationDetails = creationDetails;
-        return studentsRef.push(newStudentData).catch(error => {
+        console.log("Creation Details Object:", creationDetails);
+        return studentsRef.push(newStudentData).then(newRecord => {
+            console.log("New Record Key:", newRecord.key);
+            return studentsRef.child(newRecord.key).child('creationDetails').set(creationDetails);
+        }).catch(error => {
             errorMessage.textContent = "Failed to save data.";
             errorMessage.style.display = 'block';
             setTimeout(() => {
@@ -410,12 +416,6 @@ function showHistory(studentId) {
             const creationEntryDiv = document.createElement('div');
             creationEntryDiv.classList.add('history-entry');
             creationEntryDiv.innerHTML = `<h4>Student Record Creation</h4><p><strong>Date:</strong> ${creationDate}</p><p><strong>Created By:</strong> ${createdByEmail}</p><hr>`;
-            historyDetails.appendChild(creationEntryDiv);
-        } else if (studentSnapshot.exists() && studentSnapshot.val().creationTimestamp) {
-            const creationDate = new Date(studentSnapshot.val().creationTimestamp).toLocaleString();
-            const creationEntryDiv = document.createElement('div');
-            creationEntryDiv.classList.add('history-entry');
-            creationEntryDiv.innerHTML = `<h4>Student Record Creation</h4><p><strong>Date:</strong> ${creationDate}</p><hr>`;
             historyDetails.appendChild(creationEntryDiv);
         }
         if (historySnapshot.exists()) {
