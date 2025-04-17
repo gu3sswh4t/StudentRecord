@@ -186,6 +186,7 @@ function saveStudentData(newStudentData, studentId = null) {
 }
 addStudentForm.addEventListener('submit', function(e) {
     e.preventDefault();
+    console.log("addStudentForm submit event triggered!"); // Added log
     const lrn = document.getElementById('lrn').value;
     const firstName = document.getElementById('firstName').value;
     const lastName = document.getElementById('lastName').value;
