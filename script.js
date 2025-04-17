@@ -157,8 +157,11 @@ function saveStudentData(newStudentData, studentId = null) {
             }
         });
     } else {
-        newStudentData.creationTimestamp = timestamp;
-        newStudentData.createdByEmail = createdByEmail;
+        const creationDetails = {
+            timestamp: timestamp,
+            createdByEmail: createdByEmail
+        };
+        newStudentData.creationDetails = creationDetails;
         return studentsRef.push(newStudentData).catch(error => {
             errorMessage.textContent = "Failed to save data.";
             errorMessage.style.display = 'block';
@@ -400,22 +403,20 @@ function showHistory(studentId) {
     }
     Promise.all([studentsRef.child(studentId).child('history').orderByChild('timestamp').get(), studentsRef.child(studentId).get()]).then(([historySnapshot, studentSnapshot]) => {
         historyDetails.innerHTML = '';
-        if (studentSnapshot.exists()) {
-            const studentData = studentSnapshot.val();
-            if (studentData.creationTimestamp && studentData.createdByEmail) {
-                const creationDate = new Date(studentData.creationTimestamp).toLocaleString();
-                const createdByEmail = studentData.createdByEmail;
-                const creationEntryDiv = document.createElement('div');
-                creationEntryDiv.classList.add('history-entry');
-                creationEntryDiv.innerHTML = `<h4>Student Record Creation</h4><p><strong>Date:</strong> ${creationDate}</p><p><strong>Created By:</strong> ${createdByEmail}</p><hr>`;
-                historyDetails.appendChild(creationEntryDiv); // Append creation info first
-            } else if (studentData.creationTimestamp) {
-                const creationDate = new Date(studentData.creationTimestamp).toLocaleString();
-                const creationEntryDiv = document.createElement('div');
-                creationEntryDiv.classList.add('history-entry');
-                creationEntryDiv.innerHTML = `<h4>Student Record Creation</h4><p><strong>Date:</strong> ${creationDate}</p><hr>`;
-                historyDetails.appendChild(creationEntryDiv); // Append creation info first
-            }
+        if (studentSnapshot.exists() && studentSnapshot.val().creationDetails) {
+            const creationDetails = studentSnapshot.val().creationDetails;
+            const creationDate = new Date(creationDetails.timestamp).toLocaleString();
+            const createdByEmail = creationDetails.createdByEmail;
+            const creationEntryDiv = document.createElement('div');
+            creationEntryDiv.classList.add('history-entry');
+            creationEntryDiv.innerHTML = `<h4>Student Record Creation</h4><p><strong>Date:</strong> ${creationDate}</p><p><strong>Created By:</strong> ${createdByEmail}</p><hr>`;
+            historyDetails.appendChild(creationEntryDiv);
+        } else if (studentSnapshot.exists() && studentSnapshot.val().creationTimestamp) {
+            const creationDate = new Date(studentSnapshot.val().creationTimestamp).toLocaleString();
+            const creationEntryDiv = document.createElement('div');
+            creationEntryDiv.classList.add('history-entry');
+            creationEntryDiv.innerHTML = `<h4>Student Record Creation</h4><p><strong>Date:</strong> ${creationDate}</p><hr>`;
+            historyDetails.appendChild(creationEntryDiv);
         }
         if (historySnapshot.exists()) {
             const historyData = historySnapshot.val();
@@ -472,9 +473,7 @@ function showHistory(studentId) {
                 });
             }
         }
-        if (historyDetails.children.length === 1 && historyDetails.firstChild.textContent.startsWith("Student Record Creation")) {
-            historyDetails.textContent = "No modifications have been made to this record yet.";
-        } else if (historyDetails.children.length === 0) {
+        if (historyDetails.children.length === 0) {
             historyDetails.textContent = "No modification history available for this student.";
         }
         historyModal.style.display = 'block';
