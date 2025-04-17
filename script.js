@@ -439,6 +439,8 @@ function showHistory(studentId) {
             const historyData = historySnapshot.val();
             if (historyData) {
                 const entries = Object.values(historyData);
+                // Sort entries by timestamp in descending order (most recent first)
+                entries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 entries.forEach(entry => {
                     const entryDiv = document.createElement('div');
                     entryDiv.classList.add('history-entry');
@@ -640,3 +642,19 @@ studentsRef.on('value', (snapshot) => {
 addEnrollment();
 addMisconduct();
 hideInstallButtonIfInstalled();
+
+
+document.getElementById('lrn').addEventListener('keypress', function(event) {
+    const charCode = (event.which) ? event.which : event.keyCode;
+    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+        event.preventDefault();
+    }
+});
+
+
+document.getElementById('contact').addEventListener('keypress', function(event) {
+    const charCode = (event.which) ? event.which : event.keyCode;
+    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+        event.preventDefault();
+    }
+});
