@@ -184,104 +184,114 @@ function saveStudentData(newStudentData, studentId = null) {
         });
     }
 }
-addStudentForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    console.log("addStudentForm submit event triggered!"); // Added log
-    const lrn = document.getElementById('lrn').value;
-    const firstName = document.getElementById('firstName').value;
-    const lastName = document.getElementById('lastName').value;
-    const middleName = document.getElementById('middleName').value;
-    const sex = document.getElementById('sex').value;
-    const contact = document.getElementById('contact').value;
-    const address = document.getElementById('address').value;
-    const dob = document.getElementById('dob').value;
-    const parents = document.getElementById('parents').value;
-    const guardian = document.getElementById('guardian').value;
-    const religion = document.getElementById('religion').value;
-    const fourPs = document.getElementById('fourPs').checked;
-    const club = document.getElementById('club').value;
-    const learningModality = document.getElementById('learningModality').value;
-    const schoolRecordReleased = document.getElementById('schoolRecordReleased').checked;
-    const releaseDate = document.getElementById('releaseDate').value;
-    const currentStudentId = studentIdInput.value;
-    const juniorHighGraduationDate = juniorHighGraduationDateInput.value;
-    const seniorHighGraduationDate = seniorHighGraduationDateInput.value;
-    const juniorHighHonors = juniorHighHonorsInput.value;
-    const seniorHighHonors = seniorHighHonorsInput.value;
-    const remarks = document.getElementById('remarks').value;
-    const enrollmentHistory = {};
-    document.querySelectorAll('.enrollment-record').forEach((record, index) => {
-        const schoolYear = record.querySelector('.school-year').value;
-        const enrollmentDate = record.querySelector('.enrollment-date').value;
-        if (schoolYear && enrollmentDate) {
-            enrollmentHistory[`enrollment_${index}`] = { schoolYear, enrollmentDate };
+
+// More robust way to get the form and add the listener
+const studentForm = document.getElementById('add-student-form');
+if (studentForm) {
+    studentForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        console.log("addStudentForm submit event triggered!");
+
+        const lrn = document.getElementById('lrn').value;
+        const firstName = document.getElementById('firstName').value;
+        const lastName = document.getElementById('lastName').value;
+        const middleName = document.getElementById('middleName').value;
+        const sex = document.getElementById('sex').value;
+        const contact = document.getElementById('contact').value;
+        const address = document.getElementById('address').value;
+        const dob = document.getElementById('dob').value;
+        const parents = document.getElementById('parents').value;
+        const guardian = document.getElementById('guardian').value;
+        const religion = document.getElementById('religion').value;
+        const fourPs = document.getElementById('fourPs').checked;
+        const club = document.getElementById('club').value;
+        const learningModality = document.getElementById('learningModality').value;
+        const schoolRecordReleased = document.getElementById('schoolRecordReleased').checked;
+        const releaseDate = document.getElementById('releaseDate').value;
+        const currentStudentId = studentIdInput.value;
+        const juniorHighGraduationDate = juniorHighGraduationDateInput.value;
+        const seniorHighGraduationDate = seniorHighGraduationDateInput.value;
+        const juniorHighHonors = juniorHighHonorsInput.value;
+        const seniorHighHonors = seniorHighHonorsInput.value;
+        const remarks = document.getElementById('remarks').value;
+        const enrollmentHistory = {};
+        document.querySelectorAll('.enrollment-record').forEach((record, index) => {
+            const schoolYear = record.querySelector('.school-year').value;
+            const enrollmentDate = record.querySelector('.enrollment-date').value;
+            if (schoolYear && enrollmentDate) {
+                enrollmentHistory[`enrollment_${index}`] = { schoolYear, enrollmentDate };
+            }
+        });
+        const misconductInstances = {};
+        document.querySelectorAll('.misconduct-instance').forEach((instance, index) => {
+            const reason = instance.querySelector('.misconduct-reason').value;
+            const date = instance.querySelector('.misconduct-date').value;
+            const personsInvolved = instance.querySelector('.misconduct-persons').value;
+            if (reason) {
+                misconductInstances[`misconduct_${index}`] = { reason, date, personsInvolved };
+            }
+        });
+        const newStudent = {
+            lrn,
+            firstName,
+            lastName,
+            middleName,
+            sex,
+            contact,
+            address,
+            dob,
+            parents,
+            guardian,
+            religion,
+            fourPs,
+            club,
+            learningModality,
+            enrollmentHistory,
+            misconductInstances,
+            schoolRecordReleased,
+            releaseDate: schoolRecordReleased ? releaseDate : null,
+            juniorHighGraduationDate,
+            seniorHighGraduationDate,
+            juniorHighHonors,
+            seniorHighHonors,
+            remarks
+        };
+        if (!currentStudentId) {
+            const isDuplicate = allStudentsData.some(studentData => studentData.val().lrn === lrn);
+            if (isDuplicate) {
+                errorMessage.textContent = `LRN "${lrn}" already exists. Please enter a unique LRN.`;
+                errorMessage.style.display = 'block';
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                }, 3000);
+                return;
+            }
         }
-    });
-    const misconductInstances = {};
-    document.querySelectorAll('.misconduct-instance').forEach((instance, index) => {
-        const reason = instance.querySelector('.misconduct-reason').value;
-        const date = instance.querySelector('.misconduct-date').value;
-        const personsInvolved = instance.querySelector('.misconduct-persons').value;
-        if (reason) {
-            misconductInstances[`misconduct_${index}`] = { reason, date, personsInvolved };
-        }
-    });
-    const newStudent = {
-        lrn,
-        firstName,
-        lastName,
-        middleName,
-        sex,
-        contact,
-        address,
-        dob,
-        parents,
-        guardian,
-        religion,
-        fourPs,
-        club,
-        learningModality,
-        enrollmentHistory,
-        misconductInstances,
-        schoolRecordReleased,
-        releaseDate: schoolRecordReleased ? releaseDate : null,
-        juniorHighGraduationDate,
-        seniorHighGraduationDate,
-        juniorHighHonors,
-        seniorHighHonors,
-        remarks
-    };
-    if (!currentStudentId) {
-        const isDuplicate = allStudentsData.some(studentData => studentData.val().lrn === lrn);
-        if (isDuplicate) {
-            errorMessage.textContent = `LRN "${lrn}" already exists. Please enter a unique LRN.`;
-            errorMessage.style.display = 'block';
+        console.log("Data to be saved:", newStudent); // Added log
+        saveStudentData(newStudent, currentStudentId).then(() => {
+            addStudentForm.reset();
+            enrollmentFieldsContainer.innerHTML = '';
+            misconductFieldsContainer.innerHTML = '';
+            enrollmentCounter = 0;
+            misconductCounter = 0;
+            releaseDateLabel.style.display = 'none';
+            releaseDateInput.style.display = 'none';
+            studentIdInput.value = '';
+            lrnInput.disabled = false;
+            studentFormHeader.textContent = 'Add New Student / Edit Student';
+            addRecordModal.style.display = 'none';
+            confirmationMessage.style.display = 'block';
             setTimeout(() => {
-                errorMessage.style.display = 'none';
+                confirmationMessage.style.display = 'none';
             }, 3000);
-            return;
-        }
-    }
-    saveStudentData(newStudent, currentStudentId).then(() => {
-        addStudentForm.reset();
-        enrollmentFieldsContainer.innerHTML = '';
-        misconductFieldsContainer.innerHTML = '';
-        enrollmentCounter = 0;
-        misconductCounter = 0;
-        releaseDateLabel.style.display = 'none';
-        releaseDateInput.style.display = 'none';
-        studentIdInput.value = '';
-        lrnInput.disabled = false;
-        studentFormHeader.textContent = 'Add New Student / Edit Student';
-        addRecordModal.style.display = 'none';
-        confirmationMessage.style.display = 'block';
-        setTimeout(() => {
-            confirmationMessage.style.display = 'none';
-        }, 3000);
-    }).catch(error => {
-        console.error("Error during save operation:", error);
+        }).catch(error => {
+            console.error("Error during save operation:", error);
+        });
     });
-});
+} else {
+    console.error("Error: Could not find the 'add-student-form' element in the HTML.");
+}
+
 function editStudent(studentId) {
     studentIdInput.value = studentId;
     studentFormHeader.textContent = 'Edit Student';
