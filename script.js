@@ -121,6 +121,7 @@ function saveStudentData(newStudentData, studentId = null) {
     console.log("Current User Object in saveStudentData:", currentUser);
     const modifiedBy = currentUser ? currentUser.uid : 'Unknown User';
     const modifiedByUserDisplayName = currentUser ? (currentUser.displayName || currentUser.email || 'User ID: ' + modifiedBy) : 'Unknown User';
+    const createdByEmail = currentUser ? currentUser.email : 'Unknown User';
     console.log("Modified By User ID:", modifiedBy);
     console.log("Modified By User Display Name:", modifiedByUserDisplayName);
 
@@ -181,6 +182,7 @@ function saveStudentData(newStudentData, studentId = null) {
         });
     } else {
         newStudentData.creationTimestamp = timestamp;
+        newStudentData.createdByEmail = createdByEmail;
         return studentsRef.push(newStudentData)
             .then(ref => {
                 console.log(`New data pushed with ID: ${ref.key}`);
@@ -468,12 +470,19 @@ function showHistory(studentId) {
 
         if (studentSnapshot.exists()) {
             const studentData = studentSnapshot.val();
-            if (studentData.creationTimestamp) {
+            if (studentData.creationTimestamp && studentData.createdByEmail) {
+                const creationDate = new Date(studentData.creationTimestamp).toLocaleString();
+                const createdByEmail = studentData.createdByEmail;
+                const creationEntryDiv = document.createElement('div');
+                creationEntryDiv.classList.add('history-entry');
+                creationEntryDiv.innerHTML = `<h4>Student Record Creation</h4><p><strong>Date:</strong> ${creationDate}</p><p><strong>Created By:</strong> ${createdByEmail}</p><hr>`;
+                historyDetails.prepend(creationEntryDiv);
+            } else if (studentData.creationTimestamp) {
                 const creationDate = new Date(studentData.creationTimestamp).toLocaleString();
                 const creationEntryDiv = document.createElement('div');
                 creationEntryDiv.classList.add('history-entry');
-                creationEntryDiv.innerHTML = `<h4>Record Created At: ${creationDate}</h4><hr>`;
-                historyDetails.appendChild(creationEntryDiv);
+                creationEntryDiv.innerHTML = `<h4>Student Record Creation</h4><p><strong>Date:</strong> ${creationDate}</p><hr>`;
+                historyDetails.prepend(creationEntryDiv);
             }
         }
 
@@ -543,7 +552,7 @@ function showHistory(studentId) {
                 }
             });
 
-            if (historyDetails.children.length === 1 && historyDetails.firstChild.textContent.startsWith("Record Created At")) {
+            if (historyDetails.children.length === 1 && historyDetails.firstChild.textContent.startsWith("Student Record Creation")) {
                 historyDetails.textContent = "No modifications have been made to this record yet.";
             } else if (historyDetails.children.length === 0) {
                 historyDetails.textContent = "No modification history available for this student.";
