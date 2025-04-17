@@ -185,7 +185,7 @@ function saveStudentData(newStudentData, studentId = null) {
     }
 }
 
-// More robust way to get the form and add the listener
+
 const studentForm = document.getElementById('add-student-form');
 if (studentForm) {
     studentForm.addEventListener('submit', function(e) {
@@ -267,7 +267,7 @@ if (studentForm) {
                 return;
             }
         }
-        console.log("Data to be saved:", newStudent); // Added log
+        console.log("Data to be saved:", newStudent);
         saveStudentData(newStudent, currentStudentId).then(() => {
             addStudentForm.reset();
             enrollmentFieldsContainer.innerHTML = '';
