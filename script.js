@@ -166,8 +166,14 @@ function saveStudentData(newStudentData, studentId = null) {
         };
         console.log("Creation Details Object:", creationDetails);
         return studentsRef.push(newStudentData).then(newRecord => {
-            console.log("New Record Key:", newRecord.key);
-            return studentsRef.child(newRecord.key).child('creationDetails').set(creationDetails);
+            const newRecordKey = newRecord.key;
+            console.log("New Record Key in .then():", newRecordKey);
+            console.log("Attempting to set creationDetails at:", `students/${newRecordKey}/creationDetails`);
+            return studentsRef.child(newRecordKey).child('creationDetails').set(creationDetails).then(() => {
+                console.log("creationDetails set successfully for key:", newRecordKey);
+            }).catch(error => {
+                console.error("Error setting creationDetails:", error);
+            });
         }).catch(error => {
             errorMessage.textContent = "Failed to save data.";
             errorMessage.style.display = 'block';
