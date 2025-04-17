@@ -400,7 +400,6 @@ function showHistory(studentId) {
     }
     Promise.all([studentsRef.child(studentId).child('history').orderByChild('timestamp').get(), studentsRef.child(studentId).get()]).then(([historySnapshot, studentSnapshot]) => {
         historyDetails.innerHTML = '';
-        const historyEntries = [];
         if (studentSnapshot.exists()) {
             const studentData = studentSnapshot.val();
             if (studentData.creationTimestamp && studentData.createdByEmail) {
@@ -409,80 +408,73 @@ function showHistory(studentId) {
                 const creationEntryDiv = document.createElement('div');
                 creationEntryDiv.classList.add('history-entry');
                 creationEntryDiv.innerHTML = `<h4>Student Record Creation</h4><p><strong>Date:</strong> ${creationDate}</p><p><strong>Created By:</strong> ${createdByEmail}</p><hr>`;
-                historyDetails.prepend(creationEntryDiv);
+                historyDetails.appendChild(creationEntryDiv); // Append creation info first
             } else if (studentData.creationTimestamp) {
                 const creationDate = new Date(studentData.creationTimestamp).toLocaleString();
                 const creationEntryDiv = document.createElement('div');
                 creationEntryDiv.classList.add('history-entry');
                 creationEntryDiv.innerHTML = `<h4>Student Record Creation</h4><p><strong>Date:</strong> ${creationDate}</p><hr>`;
-                historyDetails.prepend(creationEntryDiv);
+                historyDetails.appendChild(creationEntryDiv); // Append creation info first
             }
         }
         if (historySnapshot.exists()) {
             const historyData = historySnapshot.val();
             if (historyData) {
                 const entries = Object.values(historyData);
-                historyEntries.push(...entries);
-            }
-        }
-        if (historyEntries.length > 0) {
-            historyEntries.forEach(entry => {
-                const entryDiv = document.createElement('div');
-                entryDiv.classList.add('history-entry');
-                const formattedTime = new Date(entry.timestamp).toLocaleString();
-                const modifiedByDisplayName = entry.modifiedByUserDisplayName;
-                let changesHTML = '<p><strong>Changes:</strong></p><ul>';
-                let hasChanges = false;
-                for (const key in entry.changes) {
-                    if (entry.changes.hasOwnProperty(key)) {
-                        const change = entry.changes[key];
-                        const oldValueString = JSON.stringify(change.oldValue);
-                        const newValueString = JSON.stringify(change.newValue);
-                        if (oldValueString !== newValueString) {
-                            hasChanges = true;
-                            changesHTML += `<li><strong>${key}:</strong> `;
-                            const formatObject = (obj, level = 0) => {
-                                if (obj === null) return 'null';
-                                if (typeof obj !== 'object') {
-                                    return obj;
-                                }
-                                let formattedString = '{ ';
-                                const properties = Object.keys(obj);
-                                properties.forEach((prop, index) => {
-                                    formattedString += `${prop}: `;
-                                    formattedString += formatObject(obj[prop], level + 1);
-                                    if (index < properties.length - 1) {
-                                        formattedString += ', ';
+                entries.forEach(entry => {
+                    const entryDiv = document.createElement('div');
+                    entryDiv.classList.add('history-entry');
+                    const formattedTime = new Date(entry.timestamp).toLocaleString();
+                    const modifiedByDisplayName = entry.modifiedByUserDisplayName;
+                    let changesHTML = '<p><strong>Changes:</strong></p><ul>';
+                    let hasChanges = false;
+                    for (const key in entry.changes) {
+                        if (entry.changes.hasOwnProperty(key)) {
+                            const change = entry.changes[key];
+                            const oldValueString = JSON.stringify(change.oldValue);
+                            const newValueString = JSON.stringify(change.newValue);
+                            if (oldValueString !== newValueString) {
+                                hasChanges = true;
+                                changesHTML += `<li><strong>${key}:</strong> `;
+                                const formatObject = (obj, level = 0) => {
+                                    if (obj === null) return 'null';
+                                    if (typeof obj !== 'object') {
+                                        return obj;
                                     }
-                                });
-                                formattedString += ' }';
-                                return formattedString;
-                            };
-                            if (key === 'enrollmentHistory') {
-                                changesHTML += `Old Value: ${formatObject(change.oldValue)}, New Value: ${formatObject(change.newValue)}`;
-                            } else if (key === 'misconductInstances') {
-                                changesHTML += `Old Value: ${formatObject(change.oldValue)}, New Value: ${formatObject(change.newValue)}`;
-                            } else {
-                                changesHTML += `Old Value: ${change.oldValue === null ? 'null' : change.oldValue}, New Value: ${change.newValue === null ? 'null' : change.newValue}`;
+                                    let formattedString = '{ ';
+                                    const properties = Object.keys(obj);
+                                    properties.forEach((prop, index) => {
+                                        formattedString += `${prop}: `;
+                                        formattedString += formatObject(obj[prop], level + 1);
+                                        if (index < properties.length - 1) {
+                                            formattedString += ', ';
+                                        }
+                                    });
+                                    formattedString += ' }';
+                                    return formattedString;
+                                };
+                                if (key === 'enrollmentHistory') {
+                                    changesHTML += `Old Value: ${formatObject(change.oldValue)}, New Value: ${formatObject(change.newValue)}`;
+                                } else if (key === 'misconductInstances') {
+                                    changesHTML += `Old Value: ${formatObject(change.oldValue)}, New Value: ${formatObject(change.newValue)}`;
+                                } else {
+                                    changesHTML += `Old Value: ${change.oldValue === null ? 'null' : change.oldValue}, New Value: ${change.newValue === null ? 'null' : change.newValue}`;
+                                }
+                                changesHTML += '</li>';
                             }
-                            changesHTML += '</li>';
                         }
                     }
-                }
-                changesHTML += '</ul>';
-                if (hasChanges) {
-                    entryDiv.innerHTML = `<h4>Modified At: ${formattedTime}</h4><p><strong>Modified By:</strong> ${modifiedByDisplayName}</p>${changesHTML}<hr>`;
-                    historyDetails.appendChild(entryDiv);
-                }
-            });
-            if (historyDetails.children.length === 1 && historyDetails.firstChild.textContent.startsWith("Student Record Creation")) {
-                historyDetails.textContent = "No modifications have been made to this record yet.";
-            } else if (historyDetails.children.length === 0) {
-                historyDetails.textContent = "No modification history available for this student.";
+                    changesHTML += '</ul>';
+                    if (hasChanges) {
+                        entryDiv.innerHTML = `<h4>Modified At: ${formattedTime}</h4><p><strong>Modified By:</strong> ${modifiedByDisplayName}</p>${changesHTML}<hr>`;
+                        historyDetails.appendChild(entryDiv);
+                    }
+                });
             }
-        } else if (!studentSnapshot.exists()) {
-            historyDetails.textContent = "No modification history available for this student.";
-        } else if (historyDetails.children.length === 0 && studentSnapshot.exists() && studentSnapshot.val().creationTimestamp) {} else {
+        }
+        if (historyDetails.children.length === 1 && historyDetails.firstChild.textContent.startsWith("Student Record Creation")) {
+            historyDetails.textContent = "No modifications have been made to this record yet.";
+        } else if (historyDetails.children.length === 0) {
             historyDetails.textContent = "No modification history available for this student.";
         }
         historyModal.style.display = 'block';
