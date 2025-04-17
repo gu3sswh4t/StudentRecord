@@ -1,17 +1,14 @@
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-            .then(registration => {
-                console.log('Service Worker registered with scope:', registration.scope);
-            })
-            .catch(error => {
-                console.error('Error registering Service Worker:', error);
-            });
+        navigator.serviceWorker.register('/service-worker.js').then(registration => {
+            console.log('Service Worker registered with scope:', registration.scope);
+        }).catch(error => {
+            console.error('Error registering Service Worker:', error);
+        });
     });
 }
 
 const installButton = document.getElementById('installButton');
-
 function hideInstallButtonIfInstalled() {
     if (window.matchMedia('(display-mode: standalone)').matches) {
         console.log('App is running in standalone mode.');
@@ -20,18 +17,14 @@ function hideInstallButtonIfInstalled() {
         }
     }
 }
-
 window.addEventListener('load', hideInstallButtonIfInstalled);
-
 let deferredInstallPrompt = null;
-
 window.addEventListener('beforeinstallprompt', (e) => {
     console.log('beforeinstallprompt fired');
     e.preventDefault();
     deferredInstallPrompt = e;
     installButton.style.display = 'block';
 });
-
 installButton.addEventListener('click', async () => {
     if (deferredInstallPrompt) {
         deferredInstallPrompt.prompt();
@@ -41,17 +34,14 @@ installButton.addEventListener('click', async () => {
         installButton.style.display = 'none';
     }
 });
-
 window.addEventListener('appinstalled', (evt) => {
     console.log('appinstalled', evt);
     if (installButton) {
         installButton.style.display = 'none';
     }
 });
-
 const database = firebase.database();
 const studentsRef = database.ref('students');
-
 const studentListContainer = document.getElementById('student-list-container');
 const studentList = document.getElementById('students');
 const addStudentForm = document.getElementById('add-student-form');
@@ -77,22 +67,18 @@ const errorMessage = document.getElementById('error-message');
 const historyModal = document.getElementById('history-modal');
 const historyDetails = document.getElementById('history-details');
 const closeHistoryModalButton = document.getElementById('closeHistoryModal');
-
 const juniorHighGraduationDateInput = document.getElementById('juniorHighGraduationDate');
 const seniorHighGraduationDateInput = document.getElementById('seniorHighGraduationDate');
 const juniorHighHonorsInput = document.getElementById('juniorHighHonors');
 const seniorHighHonorsInput = document.getElementById('seniorHighHonors');
-
 const addRecordModal = document.getElementById('addRecordModal');
 const closeAddRecordModalButton = addRecordModal.querySelector('.close-button');
 const addRecordButton = document.getElementById('addRecordButton');
 const studentFormHeader = addRecordModal.querySelector('#student-form h2');
-
 let enrollmentCounter = 0;
 let misconductCounter = 0;
 let allStudentsData = [];
 let currentViewingStudentId = null;
-
 function renderStudents(data) {
     studentList.innerHTML = '';
     if (data.length > 0) {
@@ -114,17 +100,12 @@ function renderStudents(data) {
         });
     }
 }
-
 function saveStudentData(newStudentData, studentId = null) {
     const timestamp = new Date().toISOString();
     const currentUser = firebase.auth().currentUser;
-    console.log("Current User Object in saveStudentData:", currentUser);
     const modifiedBy = currentUser ? currentUser.uid : 'Unknown User';
     const modifiedByUserDisplayName = currentUser ? (currentUser.displayName || currentUser.email || 'User ID: ' + modifiedBy) : 'Unknown User';
     const createdByEmail = currentUser ? currentUser.email : 'Unknown User';
-    console.log("Modified By User ID:", modifiedBy);
-    console.log("Modified By User Display Name:", modifiedByUserDisplayName);
-
     if (studentId) {
         return studentsRef.child(studentId).get().then(snapshot => {
             const oldData = snapshot.val();
@@ -133,7 +114,6 @@ function saveStudentData(newStudentData, studentId = null) {
                 if (newStudentData.hasOwnProperty(key)) {
                     const oldValue = oldData && oldData.hasOwnProperty(key) ? oldData[key] : null;
                     let changed = false;
-
                     const areObjectsEqual = (obj1, obj2) => {
                         if (obj1 === null || obj2 === null) return obj1 === obj2;
                         const keys1 = Object.keys(obj1);
@@ -146,7 +126,6 @@ function saveStudentData(newStudentData, studentId = null) {
                         }
                         return true;
                     };
-
                     if (key === 'enrollmentHistory' || key === 'misconductInstances') {
                         if (!areObjectsEqual(oldValue, newStudentData[key])) {
                             changed = true;
@@ -156,15 +135,12 @@ function saveStudentData(newStudentData, studentId = null) {
                             changed = true;
                         }
                     }
-
                     if (changed) {
                         changes[key] = { oldValue: oldValue, newValue: newStudentData[key] };
                     }
                 }
             }
-
             if (Object.keys(changes).length > 0) {
-                console.log("Detected Changes:", changes);
                 const historyEntry = {
                     timestamp: timestamp,
                     changes: changes,
@@ -183,22 +159,16 @@ function saveStudentData(newStudentData, studentId = null) {
     } else {
         newStudentData.creationTimestamp = timestamp;
         newStudentData.createdByEmail = createdByEmail;
-        return studentsRef.push(newStudentData)
-            .then(ref => {
-                console.log(`New data pushed with ID: ${ref.key}`);
-            })
-            .catch(error => {
-                console.error("Error pushing data:", error);
-                errorMessage.textContent = "Failed to save data.";
-                errorMessage.style.display = 'block';
-                setTimeout(() => {
-                    errorMessage.style.display = 'none';
-                }, 3000);
-                throw error;
-            });
+        return studentsRef.push(newStudentData).catch(error => {
+            errorMessage.textContent = "Failed to save data.";
+            errorMessage.style.display = 'block';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 3000);
+            throw error;
+        });
     }
 }
-
 addStudentForm.addEventListener('submit', function(e) {
     e.preventDefault();
     const lrn = document.getElementById('lrn').value;
@@ -218,13 +188,11 @@ addStudentForm.addEventListener('submit', function(e) {
     const schoolRecordReleased = document.getElementById('schoolRecordReleased').checked;
     const releaseDate = document.getElementById('releaseDate').value;
     const currentStudentId = studentIdInput.value;
-
     const juniorHighGraduationDate = juniorHighGraduationDateInput.value;
     const seniorHighGraduationDate = seniorHighGraduationDateInput.value;
     const juniorHighHonors = juniorHighHonorsInput.value;
     const seniorHighHonors = seniorHighHonorsInput.value;
     const remarks = document.getElementById('remarks').value;
-
     const enrollmentHistory = {};
     document.querySelectorAll('.enrollment-record').forEach((record, index) => {
         const schoolYear = record.querySelector('.school-year').value;
@@ -233,7 +201,6 @@ addStudentForm.addEventListener('submit', function(e) {
             enrollmentHistory[`enrollment_${index}`] = { schoolYear, enrollmentDate };
         }
     });
-
     const misconductInstances = {};
     document.querySelectorAll('.misconduct-instance').forEach((instance, index) => {
         const reason = instance.querySelector('.misconduct-reason').value;
@@ -243,7 +210,6 @@ addStudentForm.addEventListener('submit', function(e) {
             misconductInstances[`misconduct_${index}`] = { reason, date, personsInvolved };
         }
     });
-
     const newStudent = {
         lrn,
         firstName,
@@ -269,10 +235,6 @@ addStudentForm.addEventListener('submit', function(e) {
         seniorHighHonors,
         remarks
     };
-
-    console.log("Data being saved:", newStudent);
-    console.log("Current Student ID before save:", currentStudentId);
-
     if (!currentStudentId) {
         const isDuplicate = allStudentsData.some(studentData => studentData.val().lrn === lrn);
         if (isDuplicate) {
@@ -284,42 +246,35 @@ addStudentForm.addEventListener('submit', function(e) {
             return;
         }
     }
-
-    saveStudentData(newStudent, currentStudentId)
-        .then(() => {
-            addStudentForm.reset();
-            enrollmentFieldsContainer.innerHTML = '';
-            misconductFieldsContainer.innerHTML = '';
-            enrollmentCounter = 0;
-            misconductCounter = 0;
-            releaseDateLabel.style.display = 'none';
-            releaseDateInput.style.display = 'none';
-            studentIdInput.value = '';
-            lrnInput.disabled = false;
-            studentFormHeader.textContent = 'Add New Student / Edit Student';
-            addRecordModal.style.display = 'none';
-            confirmationMessage.style.display = 'block';
-            setTimeout(() => {
-                confirmationMessage.style.display = 'none';
-            }, 3000);
-        })
-        .catch(error => {
-            console.error("Error during save operation:", error);
-        });
+    saveStudentData(newStudent, currentStudentId).then(() => {
+        addStudentForm.reset();
+        enrollmentFieldsContainer.innerHTML = '';
+        misconductFieldsContainer.innerHTML = '';
+        enrollmentCounter = 0;
+        misconductCounter = 0;
+        releaseDateLabel.style.display = 'none';
+        releaseDateInput.style.display = 'none';
+        studentIdInput.value = '';
+        lrnInput.disabled = false;
+        studentFormHeader.textContent = 'Add New Student / Edit Student';
+        addRecordModal.style.display = 'none';
+        confirmationMessage.style.display = 'block';
+        setTimeout(() => {
+            confirmationMessage.style.display = 'none';
+        }, 3000);
+    }).catch(error => {
+        console.error("Error during save operation:", error);
+    });
 });
-
 function editStudent(studentId) {
-    console.log("editStudent function called with ID:", studentId);
     studentIdInput.value = studentId;
     studentFormHeader.textContent = 'Edit Student';
     lrnInput.disabled = true;
     addRecordModal.style.display = 'block';
-
     studentsRef.child(studentId).get().then((snapshot) => {
         if (snapshot.exists()) {
             const student = snapshot.val();
             const releaseDateValue = student.releaseDate;
-
             document.getElementById('lrn').value = student.lrn || '';
             document.getElementById('firstName').value = student.firstName || '';
             document.getElementById('lastName').value = student.lastName || '';
@@ -337,13 +292,11 @@ function editStudent(studentId) {
             document.getElementById('schoolRecordReleased').checked = student.schoolRecordReleased || false;
             document.getElementById('releaseDate').value = releaseDateValue || '';
             toggleReleaseDate();
-
             juniorHighGraduationDateInput.value = student.juniorHighGraduationDate || '';
             seniorHighGraduationDateInput.value = student.seniorHighGraduationDate || '';
             juniorHighHonorsInput.value = student.juniorHighHonors || '';
             seniorHighHonorsInput.value = student.seniorHighHonors || '';
             document.getElementById('remarks').value = student.remarks || '';
-
             if (releaseDateValue) {
                 schoolRecordReleasedCheckbox.disabled = true;
                 releaseDateInput.disabled = true;
@@ -351,7 +304,6 @@ function editStudent(studentId) {
                 schoolRecordReleasedCheckbox.disabled = false;
                 releaseDateInput.disabled = false;
             }
-
             enrollmentFieldsContainer.innerHTML = '';
             enrollmentCounter = 0;
             if (student.enrollmentHistory) {
@@ -361,7 +313,6 @@ function editStudent(studentId) {
             } else {
                 addEnrollment();
             }
-
             misconductFieldsContainer.innerHTML = '';
             misconductCounter = 0;
             if (student.misconductInstances) {
@@ -371,9 +322,7 @@ function editStudent(studentId) {
             } else {
                 addMisconduct();
             }
-
         } else {
-            console.log("No data available for this student ID.");
             errorMessage.textContent = "No data found for this student.";
             errorMessage.style.display = 'block';
             setTimeout(() => {
@@ -382,7 +331,6 @@ function editStudent(studentId) {
             clearForm();
         }
     }).catch((error) => {
-        console.error("Error getting student data:", error);
         errorMessage.textContent = "Failed to retrieve student data for editing.";
         errorMessage.style.display = 'block';
         setTimeout(() => {
@@ -390,10 +338,7 @@ function editStudent(studentId) {
         }, 3000);
         clearForm();
     });
-
-    console.log("Student ID set for editing:", studentIdInput.value);
 }
-
 function viewStudent(studentId) {
     currentViewingStudentId = studentId;
     studentsRef.child(studentId).get().then((studentSnapshot) => {
@@ -429,11 +374,9 @@ function viewStudent(studentId) {
                 ${student.schoolRecordReleased && student.releaseDate ? `<p><strong>Release Date:</strong> ${student.releaseDate}</p>` : ''}
                 <button type="button" onclick="showHistory('${studentId}')">View Modification History</button>
             `;
-
             viewStudentDetails.innerHTML = detailsHTML;
             viewModal.style.display = "block";
         } else {
-            console.log("No data available for this student ID.");
             errorMessage.textContent = "No data found for this student.";
             errorMessage.style.display = 'block';
             setTimeout(() => {
@@ -441,17 +384,13 @@ function viewStudent(studentId) {
             }, 3000);
         }
     }).catch((error) => {
-        console.error("Error getting student data:", error);
         errorMessage.textContent = "Failed to retrieve student data.";
         errorMessage.style.display = 'block';
         setTimeout(() => {
             errorMessage.style.display = 'none';
         }, 3000);
     });
-
-    console.log("Student ID set for editing:", studentIdInput.value);
 }
-
 function showHistory(studentId) {
     const historyModal = document.getElementById('history-modal');
     const historyDetails = document.getElementById('history-details');
@@ -459,15 +398,9 @@ function showHistory(studentId) {
         console.error("Error: history-modal or history-details element not found.");
         return;
     }
-
-    Promise.all([
-        studentsRef.child(studentId).child('history').orderByChild('timestamp').get(),
-        studentsRef.child(studentId).get()
-    ]).then(([historySnapshot, studentSnapshot]) => {
-        console.log("History Snapshot Exists:", historySnapshot.exists());
+    Promise.all([studentsRef.child(studentId).child('history').orderByChild('timestamp').get(), studentsRef.child(studentId).get()]).then(([historySnapshot, studentSnapshot]) => {
         historyDetails.innerHTML = '';
         const historyEntries = [];
-
         if (studentSnapshot.exists()) {
             const studentData = studentSnapshot.val();
             if (studentData.creationTimestamp && studentData.createdByEmail) {
@@ -485,39 +418,30 @@ function showHistory(studentId) {
                 historyDetails.prepend(creationEntryDiv);
             }
         }
-
         if (historySnapshot.exists()) {
             const historyData = historySnapshot.val();
-            console.log("History Data:", historyData);
             if (historyData) {
                 const entries = Object.values(historyData);
-                console.log("History Entries:", entries);
                 historyEntries.push(...entries);
             }
         }
-
         if (historyEntries.length > 0) {
             historyEntries.forEach(entry => {
                 const entryDiv = document.createElement('div');
                 entryDiv.classList.add('history-entry');
                 const formattedTime = new Date(entry.timestamp).toLocaleString();
                 const modifiedByDisplayName = entry.modifiedByUserDisplayName;
-                console.log("Processing History Entry - Modified By Display Name:", modifiedByDisplayName);
-
                 let changesHTML = '<p><strong>Changes:</strong></p><ul>';
                 let hasChanges = false;
-
                 for (const key in entry.changes) {
                     if (entry.changes.hasOwnProperty(key)) {
                         const change = entry.changes[key];
                         const oldValueString = JSON.stringify(change.oldValue);
                         const newValueString = JSON.stringify(change.newValue);
-
                         if (oldValueString !== newValueString) {
                             hasChanges = true;
                             changesHTML += `<li><strong>${key}:</strong> `;
-
-                            const formatObject = (obj) => {
+                            const formatObject = (obj, level = 0) => {
                                 if (obj === null) return 'null';
                                 if (typeof obj !== 'object') {
                                     return obj;
@@ -525,14 +449,15 @@ function showHistory(studentId) {
                                 let formattedString = '{ ';
                                 const properties = Object.keys(obj);
                                 properties.forEach((prop, index) => {
-                                    formattedString += `${prop}: ${formatObject(obj[prop])}`;
+                                    formattedString += `${prop}: `;
+                                    formattedString += formatObject(obj[prop], level + 1);
                                     if (index < properties.length - 1) {
                                         formattedString += ', ';
                                     }
                                 });
+                                formattedString += ' }';
                                 return formattedString;
                             };
-
                             if (key === 'enrollmentHistory') {
                                 changesHTML += `Old Value: ${formatObject(change.oldValue)}, New Value: ${formatObject(change.newValue)}`;
                             } else if (key === 'misconductInstances') {
@@ -545,38 +470,29 @@ function showHistory(studentId) {
                     }
                 }
                 changesHTML += '</ul>';
-
                 if (hasChanges) {
                     entryDiv.innerHTML = `<h4>Modified At: ${formattedTime}</h4><p><strong>Modified By:</strong> ${modifiedByDisplayName}</p>${changesHTML}<hr>`;
                     historyDetails.appendChild(entryDiv);
                 }
             });
-
             if (historyDetails.children.length === 1 && historyDetails.firstChild.textContent.startsWith("Student Record Creation")) {
                 historyDetails.textContent = "No modifications have been made to this record yet.";
             } else if (historyDetails.children.length === 0) {
                 historyDetails.textContent = "No modification history available for this student.";
             }
-
         } else if (!studentSnapshot.exists()) {
             historyDetails.textContent = "No modification history available for this student.";
-        } else if (historyDetails.children.length === 0 && studentSnapshot.exists() && studentSnapshot.val().creationTimestamp) {
-
-        } else {
+        } else if (historyDetails.children.length === 0 && studentSnapshot.exists() && studentSnapshot.val().creationTimestamp) {} else {
             historyDetails.textContent = "No modification history available for this student.";
         }
         historyModal.style.display = 'block';
     }).catch(error => {
-        console.error("Error fetching history:", error);
         historyDetails.textContent = "Failed to load modification history.";
         historyModal.style.display = 'block';
     });
 }
-
 searchInput.addEventListener('input', function() {
     const searchTerm = searchInput.value.toLowerCase();
-    console.log("Search Input Value:", searchTerm);
-
     if (searchTerm.trim() === "") {
         renderStudents([]);
     } else {
@@ -589,7 +505,6 @@ searchInput.addEventListener('input', function() {
         renderStudents(results);
     }
 });
-
 function addEnrollment(schoolYear = `${new Date().getFullYear()} - ${new Date().getFullYear() + 1}`, enrollmentDate = '') {
     enrollmentCounter++;
     const enrollmentDiv = document.createElement('div');
@@ -604,11 +519,9 @@ function addEnrollment(schoolYear = `${new Date().getFullYear()} - ${new Date().
     `;
     enrollmentFieldsContainer.appendChild(enrollmentDiv);
 }
-
 function removeEnrollment(button) {
     button.parentNode.remove();
 }
-
 function addMisconduct(reason = '', date = '', personsInvolved = '') {
     misconductCounter++;
     const misconductDiv = document.createElement('div');
@@ -631,11 +544,9 @@ function addMisconduct(reason = '', date = '', personsInvolved = '') {
     `;
     misconductFieldsContainer.appendChild(misconductDiv);
 }
-
 function removeMisconduct(button) {
     button.parentNode.remove();
 }
-
 function toggleReleaseDate() {
     if (document.getElementById('schoolRecordReleased').checked) {
         releaseDateLabel.style.display = 'inline';
@@ -646,7 +557,6 @@ function toggleReleaseDate() {
         document.getElementById('releaseDate').value = '';
     }
 }
-
 function clearForm() {
     document.getElementById('add-student-form').reset();
     enrollmentFieldsContainer.innerHTML = '';
@@ -658,50 +568,41 @@ function clearForm() {
     studentIdInput.value = '';
     lrnInput.disabled = false;
     studentFormHeader.textContent = 'Add New Student / Edit Student';
-
     juniorHighGraduationDateInput.value = '';
     seniorHighGraduationDateInput.value = '';
     juniorHighHonorsInput.value = '';
     seniorHighHonorsInput.value = '';
     document.getElementById('remarks').value = '';
-
     addEnrollment();
     addMisconduct();
 }
-
 closeAddRecordModalButton.addEventListener('click', () => {
     addRecordModal.style.display = 'none';
 });
-
 window.addEventListener('click', (event) => {
     if (event.target == addRecordModal) {
         addRecordModal.style.display = 'none';
     }
 });
-
 closeViewModalButton.addEventListener('click', function() {
     viewModal.style.display = "none";
 });
-
 window.addEventListener('click', function(event) {
     if (event.target == viewModal) {
         viewModal.style.display = "none";
     }
 });
-
 const closeHistoryModalButtonElement = document.getElementById('closeHistoryModal');
 if (closeHistoryModalButtonElement) {
     closeHistoryModalButtonElement.addEventListener('click', function() {
         historyModal.style.display = "none";
     });
 }
-
 window.addEventListener('click', function(event) {
     if (event.target == historyModal) {
         historyModal.style.display = "none";
     }
 });
-
 addRecordButton.addEventListener('click', () => {
     addRecordModal.style.display = 'block';
     studentFormHeader.textContent = 'Add New Student';
@@ -709,14 +610,12 @@ addRecordButton.addEventListener('click', () => {
     lrnInput.disabled = false;
     clearForm();
 });
-
 studentsRef.on('value', (snapshot) => {
     const studentData = [];
     snapshot.forEach((childSnapshot) => {
         studentData.push(childSnapshot);
     });
     allStudentsData = studentData;
-
     if (searchInput.value.trim() === "") {
         renderStudents([]);
     } else {
@@ -730,8 +629,6 @@ studentsRef.on('value', (snapshot) => {
         renderStudents(results);
     }
 });
-
 addEnrollment();
 addMisconduct();
-
 hideInstallButtonIfInstalled();
