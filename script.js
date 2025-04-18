@@ -697,6 +697,7 @@ addBulkRecordButton.addEventListener('click', () => {
 
 function removeBulkStudentRecord(button) {
     bulkAddFormsContainer.removeChild(button.parentNode);
+    
     const recordDivs = bulkAddFormsContainer.querySelectorAll('.bulk-student-record');
     recordDivs.forEach((div, index) => {
         const h3 = div.querySelector('h3');
@@ -738,7 +739,7 @@ function processBulkRecordsForm() {
             dob: dob,
             parents: parents,
             learningModality: learningModality
-            
+           
         };
 
         const isDuplicate = allStudentsData.some(studentData => studentData.val().lrn === lrn);
