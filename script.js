@@ -825,18 +825,18 @@ function processBulkRecordsForm() {
              const totalRecordsSucceeded = recordsProcessedSuccessfully;
 
              if (totalRecordsSucceeded > 0) {
-                 confirmationMessage.textContent = `Bulk data has been added ${totalRecordsSucceeded} record(s).`;
+                 confirmationMessage.textContent = `Data has been added ${totalRecordsSucceeded} record(s).`;
                  if (totalRecordsFailed > 0) {
-                      confirmationMessage.textContent += ` ${totalRecordsFailed} record(s) failed. Check console for details.`;
+                      confirmationMessage.textContent += ` ${totalRecordsFailed} record(s) failed.`;
                  }
                  confirmationMessage.style.display = 'block';
                  setTimeout(() => { confirmationMessage.style.display = 'none'; }, 5000);
              } else if (totalRecordsFailed > 0) {
-                  errorMessage.textContent = `Bulk data addition failed for all records. ${totalRecordsFailed} record(s) failed. Check console for details.`;
+                  errorMessage.textContent = `Data addition failed for all records. ${totalRecordsFailed} record(s) failed.`;
                   errorMessage.style.display = 'block';
                   setTimeout(() => { errorMessage.style.display = 'none'; }, 5000);
              } else {
-                  errorMessage.textContent = 'Bulk data addition completed with no records processed.';
+                  errorMessage.textContent = 'Data addition completed with no records processed.';
                   errorMessage.style.display = 'block';
                   setTimeout(() => { errorMessage.style.display = 'none'; }, 3000);
              }
