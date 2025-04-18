@@ -16,7 +16,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: rgba(0, 128, 0, 0.9); 
+            background-color: rgba(0, 128, 0, 0.9);
             color: white;
             padding: 20px;
             border-radius: 8px;
@@ -32,13 +32,13 @@
             margin-bottom: 10px;
         }
 
-        
+
         .error-message {
             position: fixed;
-            top: 10%; 
+            top: 10%;
             left: 50%;
             transform: translateX(-50%);
-            background-color: #f44336; 
+            background-color: #f44336;
             color: white;
             padding: 15px 20px;
             border-radius: 8px;
@@ -48,7 +48,7 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
-        
+
         .logout-button {
             position: fixed;
             top: 10px;
@@ -60,32 +60,32 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
-            z-index: 100; 
+            z-index: 100;
         }
 
         .logout-button:hover {
             background-color: #0056b3;
         }
 
-        
+
         .modal {
             display: none;
-            position: fixed; 
-            z-index: 1; 
+            position: fixed;
+            z-index: 1;
             left: 0;
             top: 0;
-            width: 100%; 
+            width: 100%;
             height: 100%;
-            overflow: auto; 
-            background-color: rgba(0,0,0,0.4); 
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
         }
 
         .modal-content {
             background-color: #fefefe;
-            margin: 15% auto; 
+            margin: 15% auto;
             padding: 20px;
             border: 1px solid #888;
-            width: 80%; 
+            width: 80%;
             border-radius: 8px;
             position: relative;
         }
@@ -105,22 +105,22 @@
             text-decoration: none;
             cursor: pointer;
         }
-        
+
         #student-form {
             padding: 20px;
         }
 
         .button-container {
             display: flex;
-            justify-content: flex-start; 
-            gap: 15px; 
+            justify-content: flex-start;
+            gap: 15px;
             margin-bottom: 15px;
-            max-width: 960px; 
+            max-width: 960px;
             margin-left: auto;
             margin-right: auto;
-            padding-left: 30px; 
-            padding-right: 30px; 
-            box-sizing: border-box; 
+            padding-left: 30px;
+            padding-right: 30px;
+            box-sizing: border-box;
         }
 
         .button-container button {
@@ -147,6 +147,15 @@
         }
 
         #installButton:hover {
+            background-color: #1e7e34;
+        }
+
+        #bulkAddButton {
+            background-color: #28a745;
+            color: white;
+        }
+
+        #bulkAddButton:hover {
             background-color: #1e7e34;
         }
     </style>
@@ -242,8 +251,20 @@
             </div>
         </div>
 
+        <div id="bulkAddModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" id="closeBulkAddModal">&times;</span>
+                <h2>Bulk Add Student Records (Mandatory Fields Only)</h2>
+                <div id="bulkAddFormsContainer">
+                    </div>
+                <button type="button" id="addBulkRecordButton" style="background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 10px;">+ Add New Student</button>
+                <button type="button" onclick="processBulkRecordsForm()" style="background-color: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 10px;">Process Records</button>
+            </div>
+        </div>
+
         <div class="button-container">
             <button id="addRecordButton" style="padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">Add Record</button>
+            <button id="bulkAddButton" style="padding: 10px 15px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">Bulk Add Records</button>
             <button id="installButton" class="install-button">Install App</button>
         </div>
 
@@ -301,20 +322,20 @@
 
         auth.onAuthStateChanged((user) => {
             if (!user) {
-                
+
                 window.location.href = 'login.html';
             }
-            
+
             console.log("User is signed in:", user);
-            
+
         });
 
         logoutButton.addEventListener('click', () => {
             auth.signOut().then(() => {
-                
+
                 window.location.href = 'login.html';
             }).catch((error) => {
-                
+
                 console.error("Error signing out:", error);
             });
         });
