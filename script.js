@@ -84,6 +84,7 @@ const bulkAddModal = document.getElementById('bulkAddModal');
 const closeBulkAddModalButton = document.getElementById('closeBulkAddModal');
 const bulkAddFormsContainer = document.getElementById('bulkAddFormsContainer');
 const addBulkRecordButton = document.getElementById('addBulkRecordButton');
+
 function renderStudents(data) {
     studentList.innerHTML = '';
     if (data.length > 0) {
@@ -105,49 +106,92 @@ function renderStudents(data) {
         });
     }
 }
+
 function saveStudentData(newStudentData, studentId = null) {
     const timestamp = new Date().toISOString();
     const currentUser = firebase.auth().currentUser;
-    console.log("Current User Object in saveStudentData (new record):", currentUser);
     const modifiedBy = currentUser ? currentUser.uid : 'Unknown User';
     const modifiedByUserDisplayName = currentUser ? (currentUser.displayName || currentUser.email || 'User ID: ' + modifiedBy) : 'Unknown User';
     const createdByEmail = currentUser ? currentUser.email : 'Unknown User';
-    console.log("Created By Email (new record):", createdByEmail);
+
+    const isEffectivelyEmpty = (value) => {
+        if (value === null || value === undefined || value === "") {
+            return true;
+        }
+        if (typeof value === 'object' && value !== null && !Array.isArray(value) && Object.keys(value).length === 0) {
+             return true;
+        }
+        if (Array.isArray(value) && value.length === 0) {
+             return true;
+        }
+        return false;
+    };
+
+    const areObjectsDeepEqual = (obj1, obj2) => {
+        if (obj1 === obj2) return true;
+        if (typeof obj1 !== 'object' || obj1 === null || typeof obj2 !== 'object' || obj2 === null) return false;
+
+        const keys1 = Object.keys(obj1);
+        const keys2 = Object.keys(obj2);
+
+        if (keys1.length !== keys2.length) return false;
+
+        for (const key of keys1) {
+            if (!keys2.hasOwnProperty(key)) return false;
+            if (!areObjectsDeepEqual(obj1[key], obj2[key])) return false;
+        }
+
+        return true;
+    };
+
 
     if (studentId) {
         return studentsRef.child(studentId).get().then(snapshot => {
             const oldData = snapshot.val();
             const changes = {};
+
             for (const key in newStudentData) {
                 if (newStudentData.hasOwnProperty(key)) {
                     const oldValue = oldData && oldData.hasOwnProperty(key) ? oldData[key] : null;
+                    const newValue = newStudentData[key];
+
+                    const oldIsEmpty = isEffectivelyEmpty(oldValue);
+                    const newIsEmpty = isEffectivelyEmpty(newValue);
+
                     let changed = false;
-                    const areObjectsEqual = (obj1, obj2) => {
-                        if (obj1 === null || obj2 === null) return obj1 === obj2;
-                        const keys1 = Object.keys(obj1);
-                        const keys2 = Object.keys(obj2);
-                        if (keys1.length !== keys2.length) return false;
-                        for (let key of keys1) {
-                            if (!obj2.hasOwnProperty(key) || JSON.stringify(obj1[key]) !== JSON.stringify(obj2[key])) {
-                                return false;
-                            }
-                        }
-                        return true;
-                    };
-                    if (key === 'enrollmentHistory' || key === 'misconductInstances') {
-                        if (!areObjectsEqual(oldValue, newStudentData[key])) {
+
+                    if (key === 'fourPs' || key === 'schoolRecordReleased') {
+                        const oldBool = oldValue === true;
+                        const newBool = newValue === true;
+                        if (oldBool !== newBool) {
                             changed = true;
+                        } else {
+                             changed = false;
                         }
+                    } else if (oldIsEmpty && newIsEmpty) {
+                        changed = false;
+                    } else if (!oldIsEmpty && newIsEmpty) {
+                        changed = true;
+                    } else if (oldIsEmpty && !newIsEmpty) {
+                         changed = true;
                     } else {
-                        if (oldValue !== newStudentData[key]) {
-                            changed = true;
-                        }
+                         if (key === 'enrollmentHistory' || key === 'misconductInstances') {
+                             if (!areObjectsDeepEqual(oldValue, newValue)) {
+                                changed = true;
+                             }
+                         } else {
+                             if (oldValue !== newValue) {
+                                 changed = true;
+                             }
+                         }
                     }
+
                     if (changed) {
-                        changes[key] = { oldValue: oldValue, newValue: newStudentData[key] };
+                        changes[key] = { oldValue: oldValue, newValue: newValue };
                     }
                 }
             }
+
             if (Object.keys(changes).length > 0) {
                 const historyEntry = {
                     timestamp: timestamp,
@@ -157,7 +201,8 @@ function saveStudentData(newStudentData, studentId = null) {
                 };
                 return studentsRef.child(studentId).child('history').once('value').then(historySnapshot => {
                     const existingHistory = historySnapshot.val() || [];
-                    const updatedHistory = [...existingHistory, historyEntry];
+                    const historyArray = Array.isArray(existingHistory) ? existingHistory : Object.values(existingHistory);
+                    const updatedHistory = [...historyArray, historyEntry];
                     return studentsRef.child(studentId).update({ ...newStudentData, history: updatedHistory });
                 });
             } else {
@@ -169,22 +214,18 @@ function saveStudentData(newStudentData, studentId = null) {
             timestamp: timestamp,
             createdByEmail: createdByEmail
         };
-        console.log("Creation Details Object:", creationDetails);
         return studentsRef.push(newStudentData).then(newRecord => {
             const newRecordKey = newRecord.key;
-            console.log("New Record Key in .then():", newRecordKey);
-            console.log("Attempting to set creationDetails at:", `students/${newRecordKey}/creationDetails`);
             return studentsRef.child(newRecordKey).child('creationDetails').set(creationDetails).then(() => {
-                console.log("creationDetails set successfully for key:", newRecordKey);
-            }).catch(error => {
-                console.error("Error setting creationDetails:", error);
             });
-        }).catch(error => {
-            errorMessage.textContent = "Failed to save data.";
+        })
+        .catch(error => {
+            errorMessage.textContent = "Failed to save new student data.";
             errorMessage.style.display = 'block';
             setTimeout(() => {
                 errorMessage.style.display = 'none';
             }, 3000);
+            console.error("Error during save operation (add new):", error);
             throw error;
         });
     }
@@ -217,7 +258,7 @@ if (studentForm) {
         const juniorHighGraduationDate = juniorHighGraduationDateInput.value;
         const seniorHighGraduationDate = seniorHighGraduationDateInput.value;
         const juniorHighHonors = juniorHighHonorsInput.value;
-        const seniorHighHonors = seniorHighHonorsInput.value;
+        const seniorHighHonorsInput = document.getElementById('seniorHighHonors').value;
         const remarks = document.getElementById('remarks').value;
         const enrollmentHistory = {};
         document.querySelectorAll('.enrollment-record').forEach((record, index) => {
@@ -258,7 +299,7 @@ if (studentForm) {
             juniorHighGraduationDate,
             seniorHighGraduationDate,
             juniorHighHonors,
-            seniorHighHonors,
+            seniorHighHonors: seniorHighHonorsInput,
             remarks
         };
         if (!currentStudentId) {
@@ -272,7 +313,7 @@ if (studentForm) {
                 return;
             }
         }
-        console.log("Data to be saved:", newStudent); 
+        console.log("Data to be saved:", newStudent);
         saveStudentData(newStudent, currentStudentId).then(() => {
             addStudentForm.reset();
             enrollmentFieldsContainer.innerHTML = '';
@@ -370,6 +411,7 @@ function editStudent(studentId) {
         clearForm();
     });
 }
+
 function viewStudent(studentId) {
     currentViewingStudentId = studentId;
     studentsRef.child(studentId).get().then((studentSnapshot) => {
@@ -422,6 +464,7 @@ function viewStudent(studentId) {
         }, 3000);
     });
 }
+
 function showHistory(studentId) {
     const historyModal = document.getElementById('history-modal');
     const historyDetails = document.getElementById('history-details');
@@ -444,7 +487,7 @@ function showHistory(studentId) {
             const historyData = historySnapshot.val();
             if (historyData) {
                 const entries = Object.values(historyData);
-                
+
                 entries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 entries.forEach(entry => {
                     const entryDiv = document.createElement('div');
@@ -506,6 +549,7 @@ function showHistory(studentId) {
         historyModal.style.display = 'block';
     });
 }
+
 searchInput.addEventListener('input', function() {
     const searchTerm = searchInput.value.toLowerCase();
     if (searchTerm.trim() === "") {
@@ -520,6 +564,7 @@ searchInput.addEventListener('input', function() {
         renderStudents(results);
     }
 });
+
 function addEnrollment(schoolYear = `${new Date().getFullYear()} - ${new Date().getFullYear() + 1}`, enrollmentDate = '') {
     enrollmentCounter++;
     const enrollmentDiv = document.createElement('div');
@@ -534,9 +579,11 @@ function addEnrollment(schoolYear = `${new Date().getFullYear()} - ${new Date().
     `;
     enrollmentFieldsContainer.appendChild(enrollmentDiv);
 }
+
 function removeEnrollment(button) {
     button.parentNode.remove();
 }
+
 function addMisconduct(reason = '', date = '', personsInvolved = '') {
     misconductCounter++;
     const misconductDiv = document.createElement('div');
@@ -559,9 +606,11 @@ function addMisconduct(reason = '', date = '', personsInvolved = '') {
     `;
     misconductFieldsContainer.appendChild(misconductDiv);
 }
+
 function removeMisconduct(button) {
     button.parentNode.remove();
 }
+
 function toggleReleaseDate() {
     if (document.getElementById('schoolRecordReleased').checked) {
         releaseDateLabel.style.display = 'inline';
@@ -572,6 +621,7 @@ function toggleReleaseDate() {
         document.getElementById('releaseDate').value = '';
     }
 }
+
 function clearForm() {
     document.getElementById('add-student-form').reset();
     enrollmentFieldsContainer.innerHTML = '';
@@ -591,6 +641,7 @@ function clearForm() {
     addEnrollment();
     addMisconduct();
 }
+
 closeAddRecordModalButton.addEventListener('click', () => {
     addRecordModal.style.display = 'none';
 });
@@ -625,6 +676,7 @@ addRecordButton.addEventListener('click', () => {
     lrnInput.disabled = false;
     clearForm();
 });
+
 studentsRef.on('value', (snapshot) => {
     const studentData = [];
     snapshot.forEach((childSnapshot) => {
@@ -644,10 +696,10 @@ studentsRef.on('value', (snapshot) => {
         renderStudents(results);
     }
 });
+
 addEnrollment();
 addMisconduct();
 hideInstallButtonIfInstalled();
-
 
 document.getElementById('lrn').addEventListener('keypress', function(event) {
     const charCode = (event.which) ? event.which : event.keyCode;
@@ -655,12 +707,12 @@ document.getElementById('lrn').addEventListener('keypress', function(event) {
         event.preventDefault();
     }
 });
+
 document.getElementById('lrn').addEventListener('input', function() {
     if (this.value.length > 12) {
         this.value = this.value.slice(0, 12);
     }
 });
-
 
 document.getElementById('contact').addEventListener('keypress', function(event) {
     const charCode = (event.which) ? event.which : event.keyCode;
@@ -669,11 +721,10 @@ document.getElementById('contact').addEventListener('keypress', function(event) 
     }
 });
 
-
 bulkAddButton.addEventListener('click', () => {
     bulkAddModal.style.display = 'block';
-    bulkAddFormsContainer.innerHTML = ''; 
-    createBulkStudentRecordFields(0); 
+    bulkAddFormsContainer.innerHTML = '';
+    createBulkStudentRecordFields(0);
 });
 
 closeBulkAddModalButton.addEventListener('click', () => {
@@ -688,16 +739,14 @@ window.addEventListener('click', (event) => {
     }
 });
 
-
 addBulkRecordButton.addEventListener('click', () => {
     const recordCount = bulkAddFormsContainer.children.length;
     createBulkStudentRecordFields(recordCount);
 });
 
-
 function removeBulkStudentRecord(button) {
     bulkAddFormsContainer.removeChild(button.parentNode);
-    
+
     const recordDivs = bulkAddFormsContainer.querySelectorAll('.bulk-student-record');
     recordDivs.forEach((div, index) => {
         const h3 = div.querySelector('h3');
@@ -709,9 +758,17 @@ function removeBulkStudentRecord(button) {
 
 function processBulkRecordsForm() {
     const studentRecords = bulkAddFormsContainer.querySelectorAll('.bulk-student-record');
-    let recordsProcessed = 0;
-    let recordsFailed = 0;
+    let recordsProcessedSuccessfully = 0;
+    let recordsFailedProcessing = 0;
+    let recordsFailedSaving = 0;
     const processingPromises = [];
+
+    if (studentRecords.length === 0) {
+        errorMessage.textContent = 'Please add at least one student record to process.';
+        errorMessage.style.display = 'block';
+        setTimeout(() => { errorMessage.style.display = 'none'; }, 3000);
+        return;
+    }
 
     studentRecords.forEach((recordDiv, index) => {
         const lrn = recordDiv.querySelector(`#bulkLrn_${index}`).value.trim();
@@ -723,10 +780,18 @@ function processBulkRecordsForm() {
         const parents = recordDiv.querySelector(`#bulkParents_${index}`).value.trim();
         const learningModality = recordDiv.querySelector(`#bulkLearningModality_${index}`).value;
 
-        
         if (!lrn || !firstName || !lastName || !sex || !address || !dob || !parents || !learningModality) {
-            alert(`Missing mandatory field in Student Record #${index + 1}.`);
-            recordsFailed++;
+            console.warn(`Skipping record #${index + 1} due to missing mandatory fields.`);
+            recordsFailedProcessing++;
+            return;
+        }
+
+        const currentBatchLrn = lrn;
+        const isDuplicateInExisting = allStudentsData.some(studentData => studentData.val().lrn === currentBatchLrn);
+
+        if (isDuplicateInExisting) {
+             console.warn(`Skipping record #${index + 1} with LRN "${lrn}" because it already exists.`);
+            recordsFailedProcessing++;
             return;
         }
 
@@ -739,37 +804,46 @@ function processBulkRecordsForm() {
             dob: dob,
             parents: parents,
             learningModality: learningModality
-           
         };
 
-        const isDuplicate = allStudentsData.some(studentData => studentData.val().lrn === lrn);
-        if (isDuplicate) {
-            alert(`LRN "${lrn}" already exists in Student Record #${index + 1}. This record will be skipped.`);
-            recordsFailed++;
-            return;
-        }
-
-        processingPromises.push(saveStudentData(newStudent));
-        recordsProcessed++;
+        processingPromises.push(
+            saveStudentData(newStudent)
+                .then(() => {
+                    recordsProcessedSuccessfully++;
+                })
+                .catch((error) => {
+                    console.error(`Error saving record #${index + 1} with LRN "${lrn}":`, error);
+                    recordsFailedSaving++;
+                })
+        );
     });
 
-    if (processingPromises.length > 0) {
-        Promise.all(processingPromises)
-            .then(() => {
-                alert(`Successfully added ${recordsProcessed} records. ${recordsFailed} records failed due to errors.`);
-                bulkAddModal.style.display = 'none';
-                bulkAddFormsContainer.innerHTML = ''; 
-                
-            })
-            .catch(error => {
-                console.error('Error processing bulk data:', error);
-                alert(`An error occurred while processing bulk data: ${error.message}`);
-            });
-    } else if (studentRecords.length > 0 && recordsFailed === studentRecords.length) {
-        alert('No valid records to process.');
-    } else if (studentRecords.length === 0) {
-        alert('Please add at least one student record to process.');
-    }
+    Promise.all(processingPromises.map(p => p.catch(e => e)))
+        .then(() => {
+             const totalRecordsAttempted = studentRecords.length;
+             const totalRecordsFailed = recordsFailedProcessing + recordsFailedSaving;
+             const totalRecordsSucceeded = recordsProcessedSuccessfully;
+
+             if (totalRecordsSucceeded > 0) {
+                 confirmationMessage.textContent = `Bulk data has been added ${totalRecordsSucceeded} record(s).`;
+                 if (totalRecordsFailed > 0) {
+                      confirmationMessage.textContent += ` ${totalRecordsFailed} record(s) failed. Check console for details.`;
+                 }
+                 confirmationMessage.style.display = 'block';
+                 setTimeout(() => { confirmationMessage.style.display = 'none'; }, 5000);
+             } else if (totalRecordsFailed > 0) {
+                  errorMessage.textContent = `Bulk data addition failed for all records. ${totalRecordsFailed} record(s) failed. Check console for details.`;
+                  errorMessage.style.display = 'block';
+                  setTimeout(() => { errorMessage.style.display = 'none'; }, 5000);
+             } else {
+                  errorMessage.textContent = 'Bulk data addition completed with no records processed.';
+                  errorMessage.style.display = 'block';
+                  setTimeout(() => { errorMessage.style.display = 'none'; }, 3000);
+             }
+
+            bulkAddModal.style.display = 'none';
+            bulkAddFormsContainer.innerHTML = '';
+        });
 }
 
 
