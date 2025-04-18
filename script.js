@@ -79,6 +79,11 @@ let enrollmentCounter = 0;
 let misconductCounter = 0;
 let allStudentsData = [];
 let currentViewingStudentId = null;
+const bulkAddButton = document.getElementById('bulkAddButton');
+const bulkAddModal = document.getElementById('bulkAddModal');
+const closeBulkAddModalButton = document.getElementById('closeBulkAddModal');
+const bulkAddFormsContainer = document.getElementById('bulkAddFormsContainer');
+const addBulkRecordButton = document.getElementById('addBulkRecordButton');
 function renderStudents(data) {
     studentList.innerHTML = '';
     if (data.length > 0) {
@@ -267,7 +272,7 @@ if (studentForm) {
                 return;
             }
         }
-        console.log("Data to be saved:", newStudent);
+        console.log("Data to be saved:", newStudent); 
         saveStudentData(newStudent, currentStudentId).then(() => {
             addStudentForm.reset();
             enrollmentFieldsContainer.innerHTML = '';
@@ -439,6 +444,8 @@ function showHistory(studentId) {
             const historyData = historySnapshot.val();
             if (historyData) {
                 const entries = Object.values(historyData);
+                
+                entries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 entries.forEach(entry => {
                     const entryDiv = document.createElement('div');
                     entryDiv.classList.add('history-entry');
@@ -640,3 +647,185 @@ studentsRef.on('value', (snapshot) => {
 addEnrollment();
 addMisconduct();
 hideInstallButtonIfInstalled();
+
+
+document.getElementById('lrn').addEventListener('keypress', function(event) {
+    const charCode = (event.which) ? event.which : event.keyCode;
+    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+        event.preventDefault();
+    }
+});
+document.getElementById('lrn').addEventListener('input', function() {
+    if (this.value.length > 12) {
+        this.value = this.value.slice(0, 12);
+    }
+});
+
+
+document.getElementById('contact').addEventListener('keypress', function(event) {
+    const charCode = (event.which) ? event.which : event.keyCode;
+    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+        event.preventDefault();
+    }
+});
+
+
+bulkAddButton.addEventListener('click', () => {
+    bulkAddModal.style.display = 'block';
+    bulkAddFormsContainer.innerHTML = ''; 
+    createBulkStudentRecordFields(0); 
+});
+
+closeBulkAddModalButton.addEventListener('click', () => {
+    bulkAddModal.style.display = 'none';
+    bulkAddFormsContainer.innerHTML = '';
+});
+
+window.addEventListener('click', (event) => {
+    if (event.target == bulkAddModal) {
+        bulkAddModal.style.display = 'none';
+        bulkAddFormsContainer.innerHTML = '';
+    }
+});
+
+
+addBulkRecordButton.addEventListener('click', () => {
+    const recordCount = bulkAddFormsContainer.children.length;
+    createBulkStudentRecordFields(recordCount);
+});
+
+
+function removeBulkStudentRecord(button) {
+    bulkAddFormsContainer.removeChild(button.parentNode);
+    const recordDivs = bulkAddFormsContainer.querySelectorAll('.bulk-student-record');
+    recordDivs.forEach((div, index) => {
+        const h3 = div.querySelector('h3');
+        if (h3) {
+            h3.textContent = `Student Record #${index + 1}`;
+        }
+    });
+}
+
+function processBulkRecordsForm() {
+    const studentRecords = bulkAddFormsContainer.querySelectorAll('.bulk-student-record');
+    let recordsProcessed = 0;
+    let recordsFailed = 0;
+    const processingPromises = [];
+
+    studentRecords.forEach((recordDiv, index) => {
+        const lrn = recordDiv.querySelector(`#bulkLrn_${index}`).value.trim();
+        const firstName = recordDiv.querySelector(`#bulkFirstName_${index}`).value.trim();
+        const lastName = recordDiv.querySelector(`#bulkLastName_${index}`).value.trim();
+        const sex = recordDiv.querySelector(`#bulkSex_${index}`).value;
+        const address = recordDiv.querySelector(`#bulkAddress_${index}`).value.trim();
+        const dob = recordDiv.querySelector(`#bulkDob_${index}`).value;
+        const parents = recordDiv.querySelector(`#bulkParents_${index}`).value.trim();
+        const learningModality = recordDiv.querySelector(`#bulkLearningModality_${index}`).value;
+
+        
+        if (!lrn || !firstName || !lastName || !sex || !address || !dob || !parents || !learningModality) {
+            alert(`Missing mandatory field in Student Record #${index + 1}.`);
+            recordsFailed++;
+            return;
+        }
+
+        const newStudent = {
+            lrn: lrn,
+            firstName: firstName,
+            lastName: lastName,
+            sex: sex,
+            address: address,
+            dob: dob,
+            parents: parents,
+            learningModality: learningModality
+            
+        };
+
+        const isDuplicate = allStudentsData.some(studentData => studentData.val().lrn === lrn);
+        if (isDuplicate) {
+            alert(`LRN "${lrn}" already exists in Student Record #${index + 1}. This record will be skipped.`);
+            recordsFailed++;
+            return;
+        }
+
+        processingPromises.push(saveStudentData(newStudent));
+        recordsProcessed++;
+    });
+
+    if (processingPromises.length > 0) {
+        Promise.all(processingPromises)
+            .then(() => {
+                alert(`Successfully added ${recordsProcessed} records. ${recordsFailed} records failed due to errors.`);
+                bulkAddModal.style.display = 'none';
+                bulkAddFormsContainer.innerHTML = ''; 
+                
+            })
+            .catch(error => {
+                console.error('Error processing bulk data:', error);
+                alert(`An error occurred while processing bulk data: ${error.message}`);
+            });
+    } else if (studentRecords.length > 0 && recordsFailed === studentRecords.length) {
+        alert('No valid records to process.');
+    } else if (studentRecords.length === 0) {
+        alert('Please add at least one student record to process.');
+    }
+}
+
+
+function createBulkStudentRecordFields(recordIndex) {
+    const recordDiv = document.createElement('div');
+    recordDiv.classList.add('bulk-student-record');
+    recordDiv.style.border = '1px solid #ccc';
+    recordDiv.style.padding = '15px';
+    recordDiv.style.marginBottom = '10px';
+
+    recordDiv.innerHTML = `
+        <h3>Student Record #${recordIndex + 1}</h3>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+            <div>
+                <label for="bulkLrn_${recordIndex}">LRN:</label><br>
+                <input type="text" id="bulkLrn_${recordIndex}" maxlength="12" onkeypress="return event.charCode >= 48 && event.charCode <= 57" required style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+            </div>
+            <div>
+                <label for="bulkFirstName_${recordIndex}">First Name:</label><br>
+                <input type="text" id="bulkFirstName_${recordIndex}" required style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+            </div>
+            <div>
+                <label for="bulkLastName_${recordIndex}">Last Name:</label><br>
+                <input type="text" id="bulkLastName_${recordIndex}" required style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+            </div>
+            <div>
+                <label for="bulkSex_${recordIndex}">Sex:</label><br>
+                <select id="bulkSex_${recordIndex}" required style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                    <option value="">-- Select Sex --</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </div>
+            <div>
+                <label for="bulkAddress_${recordIndex}">Address:</label><br>
+                <textarea id="bulkAddress_${recordIndex}" required style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;"></textarea>
+            </div>
+            <div>
+                <label for="bulkDob_${recordIndex}">Date of Birth:</label><br>
+                <input type="date" id="bulkDob_${recordIndex}" required style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+            </div>
+            <div>
+                <label for="bulkParents_${recordIndex}">Parents (Full Name):</label><br>
+                <input type="text" id="bulkParents_${recordIndex}" required style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+            </div>
+            <div>
+                <label for="bulkLearningModality_${recordIndex}">Learning Modality:</label><br>
+                <select id="bulkLearningModality_${recordIndex}" required style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                    <option value="">-- Select Modality --</option>
+                    <option value="Face to Face">Face to Face</option>
+                    <option value="Modular Print">Modular Print</option>
+                    <option value="Online">Online</option>
+                    <option value="ADM">ADM</option>
+                </select>
+            </div>
+        </div>
+        <button type="button" class="remove-bulk-record" onclick="removeBulkStudentRecord(this)" style="background-color: #f44336; color: white; padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; margin-top: 15px;">Remove</button>
+    `;
+    bulkAddFormsContainer.appendChild(recordDiv);
+}
