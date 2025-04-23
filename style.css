@@ -88,138 +88,50 @@ body {
     border-radius: 4px;
     color: #1a237e;
     border-bottom: 1px solid #fbe9e7;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    flex-wrap: wrap;
 }
+
+#students li > div:first-child {
+    flex-grow: 1; 
+    margin-right: 10px; 
+}
+
+#students li > div:last-child {
+     
+     display: flex;
+     gap: 5px; 
+}
+
 
 #students li:nth-child(even) {
     background-color: #ffcc80;
 }
 
-.fullscreen-form {
-    display: none; 
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); 
-    z-index: 100;
-    overflow-y: auto; 
-}
-
-.fullscreen-form .form-content {
-    background-color: #fff;
-    margin: 30px auto;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    width: 90%; 
-    max-width: 600px; 
-    position: relative;
-    color: #1a237e;
-}
-
-.fullscreen-form .form-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #ddd;
-}
-
-.fullscreen-form .form-header h2 {
-    margin: 0;
-}
-
-.fullscreen-form .close-form-btn {
-    background: none;
-    color: #aaa;
-    border: none;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-    outline: none;
-}
-
-.fullscreen-form .close-form-btn:hover,
-.fullscreen-form .close-form-btn:focus {
-    color: black;
-    text-decoration: none;
-}
-
-.fullscreen-form .form-group {
-    margin-bottom: 15px;
-}
-
-.fullscreen-form .form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #1a237e;
-}
-
-.fullscreen-form .form-group input[type="text"],
-.fullscreen-form .form-group input[type="date"],
-.fullscreen-form .form-group input[type="tel"],
-.fullscreen-form .form-group select,
-.fullscreen-form .form-group textarea {
-    width: calc(100% - 12px);
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box;
-}
-
-.fullscreen-form .form-group textarea {
-    resize: vertical;
-}
-
-.fullscreen-form .form-actions {
-    margin-top: 20px;
-    text-align: right;
-}
-
-.fullscreen-form .form-actions button {
-    background-color: #ff7043;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    margin-left: 10px;
-}
-
-.fullscreen-form .form-actions button:first-child {
-    margin-left: 0;
-}
-
-.fullscreen-form .form-actions button:hover {
-    background-color: #e64a19;
-}
 
 
 .modal {
-    display: none; 
-    position: fixed; 
-    z-index: 1000; 
+    display: none;
+    position: fixed;
+    z-index: 1000;
     left: 0;
     top: 0;
-    width: 100%; 
-    height: 100%; 
-    overflow: auto; 
-    background-color: rgba(0,0,0,0.6); 
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6);
 }
 
 .modal-content {
-    background-color: #fff; 
-    margin: 5% auto; 
+    background-color: #fff;
+    margin: 5% auto;
     padding: 30px;
     border-radius: 12px;
-    width: 90%; 
-    max-width: 700px; 
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2); 
+    width: 90%;
+    max-width: 700px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
     position: relative;
     animation: fadeIn 0.3s ease-out;
 }
@@ -229,21 +141,30 @@ body {
     to {opacity: 1;}
 }
 
-.modal-content h2 {
-    color: #333; 
+.modal-content h2,
+.modal-content h3 { 
+    color: #333;
     margin-top: 0;
     margin-bottom: 20px;
     text-align: center;
-    border-bottom: 2px solid #eee; 
+    border-bottom: 2px solid #eee;
     padding-bottom: 15px;
 }
 
+.modal-content h3 { 
+    font-size: 1.2em;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+
 .close-button {
-    color: #888; 
+    color: #888;
     position: absolute;
     right: 15px;
-    top: 10px; 
-    font-size: 24px; 
+    top: 10px;
+    font-size: 24px;
     font-weight: normal;
     cursor: pointer;
     background: none;
@@ -258,12 +179,12 @@ body {
 .close-button:focus {
     color: #555;
     text-decoration: none;
-    opacity: 1; 
+    opacity: 1;
 }
 
 
 #student-form {
-    padding: 0; 
+    padding: 0;
 }
 
 #add-student-form label {
@@ -278,11 +199,11 @@ body {
 #add-student-form input[type="tel"],
 #add-student-form select,
 #add-student-form textarea {
-    width: calc(100% - 20px);
+    width: calc(100% - 20px); 
     padding: 10px;
     margin-bottom: 15px;
     border: 1px solid #ccc;
-    border-radius: 6px; 
+    border-radius: 6px;
     box-sizing: border-box;
     font-size: 16px;
 }
@@ -291,9 +212,16 @@ body {
     margin-right: 5px;
 }
 
+
+#notes {
+    min-height: 80px; 
+    resize: vertical; 
+}
+
+
 #add-student-form button[type="submit"],
 #add-student-form button[type="button"] {
-    background-color: #007bff; 
+    background-color: #007bff;
     color: white;
     padding: 12px 20px;
     border: none;
@@ -305,22 +233,35 @@ body {
     transition: background-color 0.3s ease;
 }
 
-#add-student-form button[type="button"] {
-    background-color: #dc3545; 
-    margin-left: 10px;
+
+#add-student-form button[type="button"][onclick="clearForm()"] {
+    background-color: #f44336;
 }
+
 
 #add-student-form button[type="submit"]:hover {
     background-color: #0056b3;
 }
 
-#add-student-form button[type="button"]:hover {
+
+#add-student-form button[type="button"][onclick="clearForm()"]:hover {
     background-color: #c82333;
 }
 
 
+#add-student-form button[type="button"]:not(.remove-btn):not([onclick="clearForm()"]) {
+     background-color: #007bff; 
+     margin-right: 10px;
+}
+#add-student-form button[type="button"]:not(.remove-btn):not([onclick="clearForm()"]):hover {
+     background-color: #0056b3; 
+}
+
+
+
 #enrollment-fields > div,
-#misconduct-fields > div {
+#misconduct-fields > div,
+#school-record-release-fields > div { 
     background-color: #f9f9f9;
     padding: 15px;
     margin-bottom: 15px;
@@ -329,7 +270,8 @@ body {
 }
 
 #enrollment-fields h3,
-#misconduct-fields h3 {
+#misconduct-fields h3,
+#school-record-release-fields h3 {
     margin-top: 0;
     margin-bottom: 10px;
     color: #777;
@@ -337,7 +279,8 @@ body {
 }
 
 #enrollment-fields label,
-#misconduct-fields label {
+#misconduct-fields label,
+#school-record-release-fields label { 
     display: block;
     margin-bottom: 5px;
     font-weight: normal;
@@ -348,7 +291,10 @@ body {
 #enrollment-fields input[type="date"],
 #misconduct-fields textarea,
 #misconduct-fields input[type="date"],
-#misconduct-fields input[type="text"] {
+#misconduct-fields input[type="text"],
+#school-record-release-fields input[type="date"], 
+#school-record-release-fields input[type="text"],
+#school-record-release-fields textarea { 
     width: calc(100% - 20px);
     padding: 8px;
     margin-bottom: 10px;
@@ -358,8 +304,15 @@ body {
     font-size: 16px;
 }
 
+#school-record-release-fields textarea {
+     min-height: 60px;
+     resize: vertical;
+}
+
+
 #enrollment-fields .remove-btn,
-#misconduct-fields .remove-btn {
+#misconduct-fields .remove-btn,
+#school-record-release-fields .remove-btn {
     background-color: #6c757d;
     color: white;
     padding: 8px 12px;
@@ -372,32 +325,25 @@ body {
 }
 
 #enrollment-fields .remove-btn:hover,
-#misconduct-fields .remove-btn:hover {
+#misconduct-fields .remove-btn:hover,
+#school-record-release-fields .remove-btn:hover { 
     background-color: #5a6268;
 }
 
 
 .button-container {
     display: flex;
-    justify-content: flex-start; 
-    gap: 15px; 
+    justify-content: flex-start;
+    gap: 15px;
     margin-bottom: 15px;
-    max-width: 960px; 
+    max-width: 960px;
     margin-left: auto;
     margin-right: auto;
-    padding-left: 30px; 
-    padding-right: 30px; 
+    padding-left: 30px;
+    padding-right: 30px;
     box-sizing: border-box;
 }
 
-.button-container button {
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-}
 
 #addRecordButton {
     background-color: #007bff;
@@ -415,4 +361,157 @@ body {
 
 #installButton:hover {
     background-color: #1e7e34;
+}
+
+#bulkAddButton {
+    background-color: #28a745; 
+    color: white;
+}
+
+#bulkAddButton:hover {
+    background-color: #1e7e34; 
+}
+
+
+#view-student-details p {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+#view-student-details strong {
+    color: #1a237e;
+}
+
+#view-student-details ul {
+    padding-left: 20px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+}
+
+#view-student-details ul li {
+    margin-bottom: 5px;
+    line-height: 1.4;
+}
+
+#view-student-details button {
+    display: block; 
+    margin-top: 15px;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+#view-student-details button:hover {
+     background-color: #0056b3;
+}
+
+
+#history-details .history-entry {
+    background-color: #f9f9f9;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #eee;
+    border-radius: 6px;
+}
+
+#history-details h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #555;
+    font-size: 1em;
+    border-bottom: 1px dashed #ccc;
+    padding-bottom: 5px;
+}
+
+#history-details p {
+    margin-bottom: 5px;
+    line-height: 1.4;
+}
+
+#history-details strong {
+     color: #333;
+}
+
+#history-details ul {
+    padding-left: 20px;
+    margin-top: 5px;
+}
+
+#history-details ul li {
+    margin-bottom: 3px;
+    line-height: 1.3;
+    word-break: break-word;
+}
+
+#history-details hr {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    border: 0;
+    border-top: 1px solid #eee;
+}
+
+
+#bulkAddFormsContainer .bulk-student-record {
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    background-color: #fff; 
+}
+
+#bulkAddFormsContainer .bulk-student-record h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 1.1em;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+
+#bulkAddFormsContainer .bulk-student-record label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+#bulkAddFormsContainer .bulk-student-record input[type="text"],
+#bulkAddFormsContainer .bulk-student-record input[type="date"],
+#bulkAddFormsContainer .bulk-student-record select,
+#bulkAddFormsContainer .bulk-student-record textarea {
+    width: 100%; 
+    padding: 8px;
+    margin-bottom: 10px; 
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 14px; 
+}
+
+#bulkAddFormsContainer .bulk-student-record textarea {
+    min-height: 60px;
+    resize: vertical;
+}
+
+
+#bulkAddFormsContainer .bulk-student-record .remove-bulk-record {
+    background-color: #f44336;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+
+#bulkAddFormsContainer .bulk-student-record .remove-bulk-record:hover {
+    background-color: #c82333;
 }
