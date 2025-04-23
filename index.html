@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STUDENT RECORD</title>
+    <title>STUDENT RECORD MANAGEMENT</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -11,6 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
+       
         .confirmation-message {
             position: fixed;
             top: 50%;
@@ -32,7 +33,6 @@
             margin-bottom: 10px;
         }
 
-
         .error-message {
             position: fixed;
             top: 10%;
@@ -48,11 +48,8 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
-
+  
         .logout-button {
-            position: fixed;
-            top: 10px;
-            right: 10px;
             padding: 8px 15px;
             background-color: #007bff;
             color: white;
@@ -60,14 +57,24 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
-            z-index: 100;
         }
 
         .logout-button:hover {
             background-color: #0056b3;
         }
 
+        
+        #logged-in-user-info {
+             display: flex; 
+             align-items: center; 
+             gap: 10px; 
+             color: #1a237e; 
+             font-weight: bold; 
+             font-size: 1em; 
+        }
 
+
+        
         .modal {
             display: none;
             position: fixed;
@@ -106,10 +113,12 @@
             cursor: pointer;
         }
 
+        
         #student-form {
             padding: 20px;
         }
 
+        
         .button-container {
             display: flex;
             justify-content: flex-start;
@@ -132,6 +141,7 @@
             font-weight: bold;
         }
 
+        
         #addRecordButton {
             background-color: #007bff;
             color: white;
@@ -150,22 +160,22 @@
             background-color: #1e7e34;
         }
 
-        #bulkAddButton {
-            background-color: #28a745;
-            color: white;
-        }
+         #bulkAddButton {
+             background-color: #28a745; 
+             color: white;
+         }
 
-        #bulkAddButton:hover {
-            background-color: #1e7e34;
-        }
+         #bulkAddButton:hover {
+             background-color: #1e7e34; 
+         }
     </style>
 </head>
 <body>
-    <button id="logoutButton" class="logout-button">Logout</button>
     <div class="container">
         <div class="header">
-            <h1>Student Data Management</h1>
-            <div>
+            <h1>COGON NATIONAL HIGH SCHOOL - Student Data Management</h1>
+            <div id="logged-in-user-info">
+                <span id="loggedInUserName"></span> <button id="logoutButton" class="logout-button">Logout</button>
             </div>
         </div>
 
@@ -178,34 +188,47 @@
                         <input type="hidden" id="student-id">
                         <label for="lrn">LRN:</label>
                         <input type="text" id="lrn" maxlength="12" required><br><br>
+
                         <label for="firstName">First Name:</label>
                         <input type="text" id="firstName" required><br><br>
+
                         <label for="lastName">Last Name:</label>
                         <input type="text" id="lastName" required><br><br>
+
                         <label for="middleName">Middle Name:</label>
                         <input type="text" id="middleName"><br><br>
+
                         <label for="sex">Sex:</label>
                         <select id="sex" required>
                             <option value="">-- Select Sex --</option>
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
                         </select><br><br>
+
                         <label for="contact">Contact Number:</label>
                         <input type="tel" id="contact" maxlength="11"><br><br>
+
                         <label for="address">Address:</label>
                         <textarea id="address" required></textarea><br><br>
+
                         <label for="dob">Date of Birth:</label>
                         <input type="date" id="dob" required><br><br>
+
                         <label for="parents">Parents (Full Name) put N/A if not applicable:</label>
                         <input type="text" id="parents" required><br><br>
+
                         <label for="guardian">Guardian (if different from parents):</label>
                         <input type="text" id="guardian"><br><br>
+
                         <label for="religion">Religion:</label>
                         <input type="text" id="religion"><br><br>
+
                         <label for="fourPs">Member of 4P's:</label>
                         <input type="checkbox" id="fourPs"><br><br>
+
                         <label for="club">Club Membership:</label>
                         <input type="text" id="club"><br><br>
+
                         <label for="learningModality">Learning Modality:</label>
                         <select id="learningModality" required>
                             <option value="">-- Select Modality --</option>
@@ -214,14 +237,19 @@
                             <option value="Online">Online</option>
                             <option value="ADM">ADM</option>
                         </select><br><br>
+
                         <label for="juniorHighGraduationDate">Date of Graduation in Junior High School:</label>
                         <input type="date" id="juniorHighGraduationDate"><br><br>
+
                         <label for="seniorHighGraduationDate">Date of Graduation in Senior High School:</label>
                         <input type="date" id="seniorHighGraduationDate"><br><br>
+
                         <label for="juniorHighHonors">Honors Received in Junior High School:</label>
                         <input type="text" id="juniorHighHonors"><br><br>
+
                         <label for="seniorHighHonors">Honors Received in Senior High School:</label>
                         <input type="text" id="seniorHighHonors"><br><br>
+
                         <label for="remarks">Remarks:</label>
                         <select id="remarks">
                             <option value="">-- Select Remark --</option>
@@ -229,23 +257,33 @@
                             <option value="Transferred Out">Transferred Out</option>
                             <option value="CCT Recipient">CCT Recipient</option>
                             <option value="Balik Aral">Balik Aral</option>
-                            <option value="Especial Needs Education">Especial Needs Education</option>
+                            <option value="Special Needs Education">Special Needs Education</option>
                             <option value="Accelerated">Accelerated</option>
-                        </select><br><br>
+                            <option value="Old Student">Old Student</option> </select><br><br>
+
+                        <label>Enrollment History:</label>
                         <button type="button" onclick="addEnrollment()">Add Enrollment</button>
                         <div id="enrollment-fields">
                         </div>
                         <br>
+
+                        <label>Misconduct Instances:</label>
                         <button type="button" onclick="addMisconduct()">Add Misconduct Instance</button>
                         <div id="misconduct-fields">
                         </div>
                         <br>
-                        <label for="schoolRecordReleased">School Record Released:</label>
-                        <input type="checkbox" id="schoolRecordReleased" onchange="toggleReleaseDate()">
-                        <label for="releaseDate" id="releaseDateLabel" style="display: none;">Release Date:</label>
-                        <input type="date" id="releaseDate" style="display: none;"><br><br>
+
+                        <label>School Record Release History:</label>
+                        <button type="button" onclick="addSchoolRecordRelease()">Add School Record Release</button>
+                        <div id="school-record-release-fields">
+                        </div>
+                        <br>
+
+                         <label for="notes">Notes:</label>
+                         <textarea id="notes" rows="4"></textarea><br><br>
+
                         <button type="submit">Save Student</button>
-                        <button type="button" onclick="clearForm()" style="background-color: #f44336; margin-left: 10px;">Clear</button>
+                        <button type="button" onclick="clearForm()" style="background-color: #f44336; margin-left: 10px;">Clear field</button>
                     </form>
                 </div>
             </div>
@@ -263,8 +301,8 @@
         </div>
 
         <div class="button-container">
-            <button id="addRecordButton" style="padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">Add Record</button>
-            <button id="bulkAddButton" style="padding: 10px 15px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">Bulk Add Records</button>
+            <button id="addRecordButton">Add Record</button>
+            <button id="bulkAddButton">Bulk Add Records</button>
             <button id="installButton" class="install-button">Install App</button>
         </div>
 
@@ -299,13 +337,13 @@
 
         <div id="confirmation-message" class="confirmation-message">
             <i class="fas fa-check-circle checkmark-icon"></i>
-            <p>Student data saved successfully!</p>
-        </div>
+            <p>Operation successful!</p> </div>
 
         <div id="error-message" class="error-message"></div>
     </div>
 
     <script>
+        
         const firebaseConfig = {
             apiKey: "AIzaSyByP-tkxIQdK7dFZa9uwKqH1I4hQDYh_1U",
             authDomain: "cnhsstudentdatabase.firebaseapp.com",
@@ -318,27 +356,52 @@
 
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
+
+       
         const logoutButton = document.getElementById('logoutButton');
+        const loggedInUserNameSpan = document.getElementById('loggedInUserName'); 
 
+        
         auth.onAuthStateChanged((user) => {
-            if (!user) {
-
+            if (user) {
+               
+                console.log("User is signed in:", user.email || user.uid);
+                
+                if (loggedInUserNameSpan) {
+                    loggedInUserNameSpan.textContent = user.displayName || user.email || 'Logged In';
+                }
+            } else {
+               
+                console.log("User is signed out, redirecting to login.");
+              
+                 if (loggedInUserNameSpan) {
+                    loggedInUserNameSpan.textContent = '';
+                }
                 window.location.href = 'login.html';
             }
-
-            console.log("User is signed in:", user);
-
         });
 
-        logoutButton.addEventListener('click', () => {
-            auth.signOut().then(() => {
-
-                window.location.href = 'login.html';
-            }).catch((error) => {
-
-                console.error("Error signing out:", error);
+        
+        if (logoutButton) {
+            logoutButton.addEventListener('click', () => {
+                auth.signOut().then(() => {
+                   
+                    console.log("User signed out.");
+                    window.location.href = 'login.html';
+                }).catch((error) => {
+                    
+                    console.error("Error signing out:", error);
+                   
+                     if (errorMessage) {
+                        errorMessage.textContent = "Failed to sign out.";
+                        errorMessage.style.display = 'block';
+                        setTimeout(() => { if(errorMessage) errorMessage.style.display = 'none'; }, 3000);
+                    }
+                });
             });
-        });
+        } else {
+             console.error("Logout button element not found.");
+        }
     </script>
     <script src="script.js"></script>
 </body>
