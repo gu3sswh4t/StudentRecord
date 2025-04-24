@@ -14,34 +14,19 @@ body {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     margin: 20px auto;
     max-width: 960px;
-    display: flex;
-    justify-content: space-between;
+    display: flex; 
+    justify-content: space-between; 
     align-items: center;
+    position: relative;
 }
 
 .header h1 {
     color: #1a237e;
-    margin-bottom: 10px;
+    margin: 0; 
+    flex-grow: 1; 
+    text-align: left; 
 }
 
-.header div {
-    margin-bottom: 10px;
-}
-
-.header button {
-    background-color: #ff7043;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-}
-
-.header button:hover {
-    background-color: #e64a19;
-}
 
 .container {
     max-width: 960px;
@@ -50,6 +35,7 @@ body {
     padding: 30px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative; 
 }
 
 .search-container {
@@ -88,34 +74,31 @@ body {
     border-radius: 4px;
     color: #1a237e;
     border-bottom: 1px solid #fbe9e7;
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     flex-wrap: wrap;
 }
 
 #students li > div:first-child {
-    flex-grow: 1; 
-    margin-right: 10px; 
+    flex-grow: 1;
+    margin-right: 10px;
 }
 
 #students li > div:last-child {
-     
-     display: flex;
-     gap: 5px; 
+    display: flex;
+    gap: 5px;
 }
-
 
 #students li:nth-child(even) {
     background-color: #ffcc80;
 }
 
 
-
 .modal {
     display: none;
     position: fixed;
-    z-index: 1000;
+    z-index: 1000; 
     left: 0;
     top: 0;
     width: 100%;
@@ -142,7 +125,7 @@ body {
 }
 
 .modal-content h2,
-.modal-content h3 { 
+.modal-content h3 {
     color: #333;
     margin-top: 0;
     margin-bottom: 20px;
@@ -151,13 +134,12 @@ body {
     padding-bottom: 15px;
 }
 
-.modal-content h3 { 
+.modal-content h3 {
     font-size: 1.2em;
     border-bottom: 1px solid #eee;
     padding-bottom: 10px;
     margin-bottom: 15px;
 }
-
 
 .close-button {
     color: #888;
@@ -199,7 +181,7 @@ body {
 #add-student-form input[type="tel"],
 #add-student-form select,
 #add-student-form textarea {
-    width: calc(100% - 20px); 
+    width: calc(100% - 20px);
     padding: 10px;
     margin-bottom: 15px;
     border: 1px solid #ccc;
@@ -214,8 +196,8 @@ body {
 
 
 #notes {
-    min-height: 80px; 
-    resize: vertical; 
+    min-height: 80px;
+    resize: vertical;
 }
 
 
@@ -250,18 +232,18 @@ body {
 
 
 #add-student-form button[type="button"]:not(.remove-btn):not([onclick="clearForm()"]) {
-     background-color: #007bff; 
+     background-color: #007bff;
      margin-right: 10px;
 }
 #add-student-form button[type="button"]:not(.remove-btn):not([onclick="clearForm()"]):hover {
-     background-color: #0056b3; 
+     background-color: #0056b3;
 }
 
 
 
 #enrollment-fields > div,
 #misconduct-fields > div,
-#school-record-release-fields > div { 
+#school-record-release-fields > div {
     background-color: #f9f9f9;
     padding: 15px;
     margin-bottom: 15px;
@@ -280,7 +262,7 @@ body {
 
 #enrollment-fields label,
 #misconduct-fields label,
-#school-record-release-fields label { 
+#school-record-release-fields label {
     display: block;
     margin-bottom: 5px;
     font-weight: normal;
@@ -292,9 +274,9 @@ body {
 #misconduct-fields textarea,
 #misconduct-fields input[type="date"],
 #misconduct-fields input[type="text"],
-#school-record-release-fields input[type="date"], 
+#school-record-release-fields input[type="date"],
 #school-record-release-fields input[type="text"],
-#school-record-release-fields textarea { 
+#school-record-release-fields textarea {
     width: calc(100% - 20px);
     padding: 8px;
     margin-bottom: 10px;
@@ -326,7 +308,7 @@ body {
 
 #enrollment-fields .remove-btn:hover,
 #misconduct-fields .remove-btn:hover,
-#school-record-release-fields .remove-btn:hover { 
+#school-record-release-fields .remove-btn:hover {
     background-color: #5a6268;
 }
 
@@ -364,13 +346,14 @@ body {
 }
 
 #bulkAddButton {
-    background-color: #28a745; 
+    background-color: #28a745;
     color: white;
 }
 
 #bulkAddButton:hover {
-    background-color: #1e7e34; 
+    background-color: #1e7e34;
 }
+
 
 
 #view-student-details p {
@@ -394,7 +377,7 @@ body {
 }
 
 #view-student-details button {
-    display: block; 
+    display: block;
     margin-top: 15px;
     padding: 10px 15px;
     background-color: #007bff;
@@ -462,7 +445,7 @@ body {
     padding: 15px;
     margin-bottom: 10px;
     border-radius: 8px;
-    background-color: #fff; 
+    background-color: #fff;
 }
 
 #bulkAddFormsContainer .bulk-student-record h3 {
@@ -485,13 +468,13 @@ body {
 #bulkAddFormsContainer .bulk-student-record input[type="date"],
 #bulkAddFormsContainer .bulk-student-record select,
 #bulkAddFormsContainer .bulk-student-record textarea {
-    width: 100%; 
+    width: 100%;
     padding: 8px;
-    margin-bottom: 10px; 
+    margin-bottom: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
-    font-size: 14px; 
+    font-size: 14px;
 }
 
 #bulkAddFormsContainer .bulk-student-record textarea {
@@ -514,4 +497,81 @@ body {
 
 #bulkAddFormsContainer .bulk-student-record .remove-bulk-record:hover {
     background-color: #c82333;
+}
+
+
+.hamburger-icon {
+    font-size: 28px; 
+    cursor: pointer;
+    color: #1a237e;
+    transition: color 0.2s ease;
+    padding: 5px; 
+    margin-left: 15px; 
+}
+
+.hamburger-icon:hover {
+    color: #ff7043; 
+}
+
+.collapsible-menu {
+    display: none; 
+    position: absolute;
+    top: 70px; 
+    right: 20px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    z-index: 999; 
+    min-width: 200px;
+    text-align: left;
+    animation: slideDown 0.3s ease-out; 
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+ .collapsible-menu.visible {
+     display: block; 
+ }
+
+.collapsible-menu #logged-in-user-info {
+    display: flex;
+    flex-direction: column; 
+    align-items: flex-start; 
+    gap: 10px; 
+    margin: 0; 
+    padding: 0; 
+}
+
+.collapsible-menu #logged-in-user-info span {
+    font-size: 1em; 
+    font-weight: bold;
+    color: #1a237e; 
+    white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%; 
+}
+
+.collapsible-menu .logout-button {
+    width: auto; 
+    align-self: stretch; 
+    padding: 8px 15px;
+    background-color: #ff7043;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em; /* Slightly smaller button text */
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+.collapsible-menu .logout-button:hover {
+    background-color: #e64a19;
 }
